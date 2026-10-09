@@ -1,9 +1,9 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { Menu, X, Mail, MessageCircle } from "lucide-react";
-import { InstagramIcon, YoutubeIcon } from "./icons";
+import { Menu, X } from "lucide-react";
+import { MailGlyph, PhoneGlyph, SOCIAL_GLYPHS, WhatsAppGlyph } from "./icons";
 import { cn } from "@/lib/utils";
-import { navItems, site } from "@/data/site";
+import { navItems, site, socials } from "@/data/site";
 
 /* ── Brand mark ─────────────────────────────────────────────────────────── */
 
@@ -190,10 +190,21 @@ export function Footer() {
               <li>
                 <a
                   href={`mailto:${site.email}`}
+                  aria-label={`Email SHANDIP at ${site.email}`}
                   className="inline-flex items-center gap-2.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  <Mail className="h-4 w-4 text-crimson" aria-hidden="true" />
+                  <MailGlyph className="h-4 w-4 text-crimson" />
                   {site.email}
+                </a>
+              </li>
+              <li>
+                <a
+                  href={site.phoneHref}
+                  aria-label={`Call SHANDIP on ${site.phoneDisplay}`}
+                  className="inline-flex items-center gap-2.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  <PhoneGlyph className="h-4 w-4 text-crimson" />
+                  {site.phoneDisplay}
                 </a>
               </li>
               <li>
@@ -201,34 +212,35 @@ export function Footer() {
                   href={site.whatsapp}
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label="Message SHANDIP on WhatsApp"
                   className="inline-flex items-center gap-2.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  <MessageCircle className="h-4 w-4 text-crimson" aria-hidden="true" />
+                  <WhatsAppGlyph className="h-4 w-4 text-crimson" />
                   WhatsApp
                 </a>
               </li>
-              <li>
-                <a
-                  href={site.instagram}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  <InstagramIcon className="h-4 w-4 text-crimson" />
-                  Instagram
-                </a>
-              </li>
-              <li>
-                <a
-                  href={site.youtube}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  <YoutubeIcon className="h-4 w-4 text-crimson" />
-                  YouTube
-                </a>
-              </li>
+            </ul>
+
+            {/* Icon-only social row — the accessible name lives on the link. */}
+            <ul className="mt-6 flex flex-wrap items-center gap-2.5" aria-label="Social profiles">
+              {socials
+                .filter((s) => s.external)
+                .map((s) => {
+                  const Icon = SOCIAL_GLYPHS[s.key];
+                  return (
+                    <li key={s.key}>
+                      <a
+                        href={s.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={s.handle}
+                        className="grid h-10 w-10 place-items-center rounded-full border border-border-subtle bg-surface-2 text-muted-foreground transition-all duration-300 hover:-translate-y-0.5 hover:border-crimson/50 hover:bg-crimson/10 hover:text-foreground"
+                      >
+                        <Icon className="h-4 w-4" />
+                      </a>
+                    </li>
+                  );
+                })}
             </ul>
           </div>
         </div>
@@ -237,7 +249,7 @@ export function Footer() {
 
         <div className="flex flex-col gap-4 text-xs text-ink-faint sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} {site.artist}. All rights reserved.</p>
-          <p>{site.placeholderNote}</p>
+          <p>{site.role}</p>
         </div>
       </div>
     </footer>

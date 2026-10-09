@@ -190,7 +190,7 @@ export function EnquiryForm() {
             onChange={(e) => set("contact", e.target.value)}
             aria-invalid={Boolean(errors.contact)}
             aria-required="true"
-            placeholder="+91 00000 00000"
+            placeholder="+91 62915 67770"
             className={cn(fieldBase, errors.contact ? badBorder : okBorder)}
           />
         </Field>

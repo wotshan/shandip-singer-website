@@ -13,6 +13,7 @@ import { AvailabilityCalendar } from "@/components/AvailabilityCalendar";
 import { EnquiryForm } from "@/components/EnquiryForm";
 import { Testimonials } from "@/components/Testimonials";
 import { ContactLinks } from "@/components/ContactLinks";
+import { SocialCarousel } from "@/components/SocialCarousel";
 import { SampleNotice } from "@/components/SampleNotice";
 import { site } from "@/data/site";
 import { upcomingEvents, eventsAreSample } from "@/data/events";
@@ -46,7 +47,7 @@ export default function Home() {
       {/* ── About ───────────────────────────────────────────────────────── */}
       <Section id="about">
         <div className="grid gap-12 lg:grid-cols-[1fr_1.1fr] lg:gap-16">
-          <Reveal>
+          <Reveal variant="left">
             <SectionHeading
               eyebrow="About"
               title={
@@ -59,7 +60,7 @@ export default function Home() {
             />
           </Reveal>
 
-          <Reveal delay={1} className="space-y-5">
+          <Reveal variant="right" delay={1} className="space-y-5">
             <p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
               {site.longIntro}
             </p>
@@ -101,7 +102,7 @@ export default function Home() {
 
         <div className="mt-10 grid gap-4 lg:grid-cols-2">
           {upcomingEvents.slice(0, 4).map((event, i) => (
-            <Reveal key={event.id} delay={((i % 2) + 1) as 1 | 2}>
+            <Reveal key={event.id} variant="scale" delay={((i % 2) + 1) as 1 | 2}>
               <EventCard event={event} />
             </Reveal>
           ))}
@@ -140,7 +141,7 @@ export default function Home() {
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {musicItems.slice(0, 3).map((item, i) => (
-            <Reveal key={item.id} delay={((i % 3) + 1) as 1 | 2 | 3}>
+            <Reveal key={item.id} variant="scale" delay={((i % 3) + 1) as 1 | 2 | 3}>
               <MusicCard item={item} />
             </Reveal>
           ))}
@@ -167,7 +168,7 @@ export default function Home() {
           />
         </Reveal>
 
-        <Reveal delay={1} className="mt-10">
+        <Reveal variant="scale" delay={1} className="mt-10">
           <GalleryGrid items={galleryItems} />
         </Reveal>
 
@@ -198,7 +199,7 @@ export default function Home() {
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {occasions.map((occasion, i) => (
-            <Reveal key={occasion.id} delay={((i % 4) + 1) as 1 | 2 | 3 | 4}>
+            <Reveal key={occasion.id} variant="scale" delay={((i % 4) + 1) as 1 | 2 | 3 | 4}>
               <OccasionCard occasion={occasion} index={i} />
             </Reveal>
           ))}
@@ -208,7 +209,7 @@ export default function Home() {
       {/* ── Availability ────────────────────────────────────────────────── */}
       <Section id="availability" className="border-t border-border-subtle">
         <div className="grid gap-12 lg:grid-cols-[1fr_1.2fr] lg:gap-16">
-          <Reveal>
+          <Reveal variant="left">
             <SectionHeading
               eyebrow="Availability"
               title="Is your date open?"
@@ -223,7 +224,7 @@ export default function Home() {
             </div>
           </Reveal>
 
-          <Reveal delay={1}>
+          <Reveal variant="right" delay={1}>
             <AvailabilityCalendar />
           </Reveal>
         </div>
@@ -232,7 +233,7 @@ export default function Home() {
       {/* ── Enquiry ─────────────────────────────────────────────────────── */}
       <Section id="enquiry" className="border-t border-border-subtle">
         <div className="grid gap-12 lg:grid-cols-[1fr_1.3fr] lg:gap-16">
-          <Reveal>
+          <Reveal variant="left">
             <SectionHeading
               eyebrow="Booking"
               title="Tell me about your event"
@@ -244,7 +245,7 @@ export default function Home() {
             </div>
           </Reveal>
 
-          <Reveal delay={1}>
+          <Reveal variant="right" delay={1}>
             <EnquiryForm />
           </Reveal>
         </div>
@@ -257,7 +258,7 @@ export default function Home() {
 
       {/* ── Contact CTA ─────────────────────────────────────────────────── */}
       <Section id="contact" className="border-t border-border-subtle">
-        <Reveal>
+        <Reveal variant="scale">
           <div className="relative overflow-hidden rounded-3xl border border-border-subtle bg-surface-2 px-6 py-14 text-center sm:px-12 sm:py-20">
             <div aria-hidden="true" className="ambience absolute inset-0 opacity-60" />
             <div className="relative">
@@ -284,6 +285,26 @@ export default function Home() {
           </div>
         </Reveal>
       </Section>
+
+      {/* ── Social carousel ───────────────────────────────────────────────── */}
+      <section
+        aria-label="Follow SHANDIP"
+        className="border-t border-border-subtle bg-surface-1 py-14 sm:py-20"
+      >
+        <Reveal>
+          <div className="mx-auto max-w-7xl px-5 sm:px-8">
+            <SectionHeading
+              eyebrow="Follow"
+              title="Everywhere I perform"
+              intro="New sets, behind-the-scenes clips and open dates — posted across these channels."
+            />
+          </div>
+        </Reveal>
+
+        <Reveal delay={1} className="mt-10">
+          <SocialCarousel />
+        </Reveal>
+      </section>
     </>
   );
 }

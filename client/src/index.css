@@ -308,3 +308,68 @@
     animation: none !important;
   }
 }
+
+/* ── Reveal variants ────────────────────────────────────────────────────────
+   The base `.reveal` rises; these let a section choose a different axis so a
+   long page does not read as one repeated gesture. All transform/opacity only. */
+/*
+  `:where()` is load-bearing, not decoration. These selectors and
+  `.js .reveal.is-visible` would otherwise have EQUAL specificity (0,3,0), and
+  because these come later in the file they would win — leaving every revealed
+  element permanently offset by its entrance transform (a `right` column stuck
+  30px to the right, a `scale` card stuck at 0.975). `:where()` contributes zero
+  specificity, so the settled `.is-visible` state always overrides the start state.
+*/
+.js .reveal:where([data-variant="scale"]) {
+  transform: translate3d(0, 18px, 0) scale(0.975);
+}
+.js .reveal:where([data-variant="left"]) {
+  transform: translate3d(-30px, 0, 0);
+}
+.js .reveal:where([data-variant="right"]) {
+  transform: translate3d(30px, 0, 0);
+}
+.js .reveal:where([data-variant="fade"]) {
+  transform: none;
+}
+
+/* ── Hero entrance ──────────────────────────────────────────────────────────
+   A slow settle on the hero photograph. Transform-only, so it composites on
+   the GPU and costs nothing on a phone. */
+@keyframes hero-zoom {
+  from { transform: scale(1.07); }
+  to   { transform: scale(1); }
+}
+.hero-zoom {
+  animation: hero-zoom 16s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ── Social carousel ────────────────────────────────────────────────────────
+   Same seamless technique as the text marquee: the row is duplicated once and
+   the track slides exactly -50%, so the loop restarts where the first copy
+   began. The duplicate is aria-hidden and untabbable, so neither a screen
+   reader nor the keyboard meets the same link twice. */
+.social-marquee-track {
+  animation: marquee-left var(--marquee-duration, 38s) linear infinite;
+}
+.social-marquee:hover .social-marquee-track,
+.social-marquee:focus-within .social-marquee-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-zoom {
+    animation: none !important;
+  }
+  /* Static, readable fallback: drop the duplicate copy and let the real row
+     wrap and centre instead of sliding. */
+  .social-marquee .social-dup {
+    display: none !important;
+  }
+  .social-marquee .social-marquee-track {
+    animation: none !important;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100% !important;
+  }
+}

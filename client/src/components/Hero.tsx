@@ -17,7 +17,7 @@ export function Hero() {
       <img
         src="/images/hero_stage.webp"
         alt="A singer silhouetted on a darkened concert stage under deep red stage lighting"
-        className="absolute inset-0 -z-20 h-full w-full object-cover object-center"
+        className="hero-zoom absolute inset-0 -z-20 h-full w-full object-cover object-center"
         fetchPriority="high"
         decoding="async"
       />
