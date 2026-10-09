@@ -94,6 +94,7 @@ export function EnquiriesInbox() {
                     ["Date", e.eventDate || "—"],
                     ["City", e.city || "—"],
                     ["Venue", e.venue || "—"],
+                    ["Budget", e.budget || "—"],
                   ] as const
                 ).map(([label, val]) => (
                   <div key={label} className="flex gap-2">

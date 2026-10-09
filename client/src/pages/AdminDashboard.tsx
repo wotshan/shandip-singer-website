@@ -20,6 +20,8 @@ import {
   Star,
   TrendingUp,
   Users,
+  Video,
+  HelpCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/_core/useAuth";
@@ -38,6 +40,9 @@ const SECTIONS: { key: SectionKey; label: string; icon: typeof Settings }[] = [
   { key: "socials", label: "Social links", icon: Link2 },
   { key: "events", label: "Events & tour", icon: CalendarDays },
   { key: "music", label: "Music", icon: ListMusic },
+  { key: "tracks", label: "Discography", icon: ListMusic },
+  { key: "videos", label: "Video reel", icon: Video },
+  { key: "faqs", label: "FAQ", icon: HelpCircle },
   { key: "occasions", label: "Occasions", icon: PartyPopper },
   { key: "awards", label: "Awards & achievements", icon: Award },
   { key: "press", label: "Press & media", icon: Newspaper },

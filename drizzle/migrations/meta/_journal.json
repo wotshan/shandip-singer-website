@@ -29,6 +29,13 @@
       "when": 1791572570347,
       "tag": "0003_loose_talon",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791578698442,
+      "tag": "0004_kind_betty_ross",
+      "breakpoints": true
     }
   ]
 }

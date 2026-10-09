@@ -8,6 +8,7 @@ import { fallbackMusic } from "@/data/music";
 import { fallbackOccasions } from "@/data/occasions";
 import { fallbackTestimonials } from "@/data/testimonials";
 import { fallbackAvailability } from "@/data/availability";
+import { fallbackFaqs, fallbackTracks, fallbackVideos } from "@/data/media";
 import {
   fallbackAwards,
   fallbackCollaborations,
@@ -42,6 +43,9 @@ const FALLBACK: SiteContent = {
   highlights: fallbackHighlights,
   fanMessages: fallbackFanMessages,
   pressMentions: fallbackPressMentions,
+  tracks: fallbackTracks,
+  videos: fallbackVideos,
+  faqs: fallbackFaqs,
 };
 
 type SiteContentValue = SiteContent & {
@@ -77,6 +81,9 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
       highlights: data?.highlights?.length ? data.highlights : FALLBACK.highlights,
       fanMessages: data?.fanMessages ?? FALLBACK.fanMessages,
       pressMentions: data?.pressMentions?.length ? data.pressMentions : FALLBACK.pressMentions,
+      tracks: data?.tracks?.length ? data.tracks : FALLBACK.tracks,
+      videos: data?.videos?.length ? data.videos : FALLBACK.videos,
+      faqs: data?.faqs?.length ? data.faqs : FALLBACK.faqs,
       isLoading: query.isLoading,
       isFallback: query.isError,
       refetch: () => void query.refetch(),

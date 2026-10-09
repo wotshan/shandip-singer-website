@@ -115,6 +115,7 @@ export type Enquiry = {
   eventDate: string | null;
   city: string;
   venue: string;
+  budget: string;
   message: string | null;
   read: boolean;
   createdAt: string;
@@ -189,6 +190,34 @@ export type Subscriber = {
   createdAt: string;
 };
 
+// ── Advanced media & FAQ collections ────────────────────────────────────────
+
+export type TrackItem = {
+  id: string;
+  title: string;
+  artist: string;
+  src: string;
+  cover: string | null;
+  duration: string | null;
+  sortOrder: number;
+};
+
+export type VideoItem = {
+  id: string;
+  title: string;
+  embedUrl: string;
+  poster: string | null;
+  caption: string;
+  sortOrder: number;
+};
+
+export type FaqItem = {
+  id: string;
+  question: string;
+  answer: string;
+  sortOrder: number;
+};
+
 export type SiteContent = {
   settings: SiteSettings;
   socials: SocialLink[];
@@ -205,6 +234,9 @@ export type SiteContent = {
   highlights: HighlightItem[];
   fanMessages: FanMessageItem[];
   pressMentions: PressMentionItem[];
+  tracks: TrackItem[];
+  videos: VideoItem[];
+  faqs: FaqItem[];
 };
 
 /** The editable collections the admin dashboard manages. */
@@ -223,6 +255,9 @@ export const CONTENT_RESOURCES = [
   "highlights",
   "fanMessages",
   "pressMentions",
+  "tracks",
+  "videos",
+  "faqs",
 ] as const;
 
 export type ContentResource = (typeof CONTENT_RESOURCES)[number];

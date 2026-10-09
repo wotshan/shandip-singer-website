@@ -466,3 +466,71 @@
 .intro-sub {
   animation: intro-sub-in 1.3s cubic-bezier(0.16, 1, 0.3, 1) 1.3s both;
 }
+
+/* ── Page transition ─────────────────────────────────────────────────────── */
+@keyframes page-enter {
+  from { opacity: 0; transform: translate3d(0, 12px, 0); }
+  to   { opacity: 1; transform: none; }
+}
+.page-enter { animation: page-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* ── Skeleton shimmer ────────────────────────────────────────────────────── */
+@keyframes skeleton-shimmer {
+  from { background-position: -200% 0; }
+  to   { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 37%, var(--surface-2) 63%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+/* ── Magnetic tilt card ──────────────────────────────────────────────────── */
+.tilt-card {
+  transform: perspective(900px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.tilt-glow { position: relative; }
+.tilt-glow::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  background: radial-gradient(220px circle at var(--glow-x, 50%) var(--glow-y, 50%), hsla(42 62% 58% / 0.14), transparent 60%);
+}
+.tilt-glow:hover::after { opacity: 1; }
+
+/* ── Equalizer bars (now-playing) ────────────────────────────────────────── */
+@keyframes eq-bounce {
+  0%, 100% { transform: scaleY(0.35); }
+  50%      { transform: scaleY(1); }
+}
+.eq-bar {
+  display: block;
+  width: 3px;
+  height: 16px;
+  border-radius: 2px;
+  background: var(--gold);
+  transform-origin: bottom;
+  animation: eq-bounce 0.9s ease-in-out infinite;
+}
+
+/* ── Enquiry success reveal ──────────────────────────────────────────────── */
+@keyframes enquiry-success-in {
+  from { opacity: 0; transform: translate3d(0, 14px, 0) scale(0.98); }
+  to   { opacity: 1; transform: none; }
+}
+.enquiry-success { animation: enquiry-success-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter { animation: none !important; }
+  .skeleton { animation: none !important; }
+  .tilt-card { transform: none !important; }
+  .eq-bar { animation: none !important; }
+  .enquiry-success { animation: none !important; }
+}

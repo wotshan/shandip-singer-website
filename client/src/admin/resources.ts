@@ -276,6 +276,53 @@ export const RESOURCES: ResourceDef[] = [
     ],
     defaults: { label: "", href: "", sortOrder: 0 },
   },
+  {
+    key: "tracks",
+    label: "Discography / Tracks",
+    singular: "track",
+    description: "Audio tracks for the custom player. Upload a real audio file (mp3/wav) or paste a URL.",
+    titleField: "title",
+    subtitleField: "artist",
+    fields: [
+      { name: "title", label: "Title", type: "text", required: true, full: true },
+      { name: "artist", label: "Artist", type: "text", placeholder: "Raag Sargam" },
+      { name: "src", label: "Audio file", type: "image", required: true, full: true, help: "Upload an mp3/wav, or paste a URL such as /app-storage/..." },
+      { name: "cover", label: "Album art", type: "image", full: true, help: "Optional cover image." },
+      { name: "duration", label: "Duration", type: "text", placeholder: "3:42" },
+      { name: "sortOrder", label: "Order", type: "number" },
+    ],
+    defaults: { title: "", artist: "Raag Sargam", src: "", cover: "", duration: "", sortOrder: 0 },
+  },
+  {
+    key: "videos",
+    label: "Video Reel",
+    singular: "video",
+    description: "Cinematic video showcase. Paste a YouTube/Vimeo embed URL or a direct video file.",
+    titleField: "title",
+    subtitleField: "caption",
+    fields: [
+      { name: "title", label: "Title", type: "text", required: true, full: true },
+      { name: "embedUrl", label: "Video URL", type: "text", required: true, full: true, help: "A YouTube/Vimeo embed link, or a direct .mp4 URL." },
+      { name: "poster", label: "Poster image", type: "image", full: true, help: "Optional thumbnail shown before play." },
+      { name: "caption", label: "Caption", type: "text", full: true },
+      { name: "sortOrder", label: "Order", type: "number" },
+    ],
+    defaults: { title: "", embedUrl: "", poster: "", caption: "", sortOrder: 0 },
+  },
+  {
+    key: "faqs",
+    label: "FAQ",
+    singular: "question",
+    description: "Frequently asked questions shown in the animated accordion.",
+    titleField: "question",
+    subtitleField: "answer",
+    fields: [
+      { name: "question", label: "Question", type: "text", required: true, full: true },
+      { name: "answer", label: "Answer", type: "textarea", required: true, full: true },
+      { name: "sortOrder", label: "Order", type: "number" },
+    ],
+    defaults: { question: "", answer: "", sortOrder: 0 },
+  },
 ];
 
 export function resourceDef(key: ContentResource): ResourceDef {

@@ -208,6 +208,7 @@ export const enquiries = pgTable(
     eventDate: text("event_date"),
     city: text("city").notNull().default(""),
     venue: text("venue").notNull().default(""),
+    budget: text("budget").notNull().default(""),
     message: text("message"),
     read: boolean("read").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -325,4 +326,52 @@ export const pressMentions = pgTable(
     sortOrder: integer("sort_order").notNull().default(0),
   },
   (t) => [index("press_mentions_order_idx").on(t.sortOrder)],
+);
+
+// ── Advanced media & FAQ collections ─────────────────────────────────────────
+// Added for the premium player, cinematic reel and FAQ accordion. Same
+// single-tenant rules: public read, admin-only write, `sortOrder` controls
+// display order. `tracks` and `videos` start EMPTY (no audio/video has been
+// supplied); `faqs` carries only answers that are true of the real booking
+// process, and the admin can edit every one.
+
+/** Discography / audio tracks for the custom player. `src` is a real audio URL. */
+export const tracks = pgTable(
+  "tracks",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    title: text("title").notNull(),
+    artist: text("artist").notNull().default(""),
+    src: text("src").notNull(),          // audio file URL (or /app-storage/... key)
+    cover: text("cover"),                // optional album art
+    duration: text("duration"),          // optional, e.g. "3:42"
+    sortOrder: integer("sort_order").notNull().default(0),
+  },
+  (t) => [index("tracks_order_idx").on(t.sortOrder)],
+);
+
+/** Cinematic video reel. `embedUrl` is a YouTube/Vimeo embed or a direct file. */
+export const videos = pgTable(
+  "videos",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    title: text("title").notNull(),
+    embedUrl: text("embed_url").notNull(),
+    poster: text("poster"),              // optional thumbnail
+    caption: text("caption").notNull().default(""),
+    sortOrder: integer("sort_order").notNull().default(0),
+  },
+  (t) => [index("videos_order_idx").on(t.sortOrder)],
+);
+
+/** Frequently asked questions shown in the animated accordion. */
+export const faqs = pgTable(
+  "faqs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    question: text("question").notNull(),
+    answer: text("answer").notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+  },
+  (t) => [index("faqs_order_idx").on(t.sortOrder)],
 );

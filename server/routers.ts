@@ -175,6 +175,26 @@ const resourceSchemas = {
     href: z.string().nullable().default(null),
     sortOrder: z.number().int().default(0),
   }),
+  tracks: z.object({
+    title: z.string().min(1),
+    artist: z.string().default(""),
+    src: z.string().min(1),
+    cover: z.string().nullable().default(null),
+    duration: z.string().nullable().default(null),
+    sortOrder: z.number().int().default(0),
+  }),
+  videos: z.object({
+    title: z.string().min(1),
+    embedUrl: z.string().min(1),
+    poster: z.string().nullable().default(null),
+    caption: z.string().default(""),
+    sortOrder: z.number().int().default(0),
+  }),
+  faqs: z.object({
+    question: z.string().min(1),
+    answer: z.string().min(1),
+    sortOrder: z.number().int().default(0),
+  }),
 } satisfies Record<ResourceName, z.ZodTypeAny>;
 
 const resourceName = z.string().refine(isResourceName, { message: "Unknown resource" });
@@ -250,6 +270,7 @@ const enquiriesRouter = router({
         eventDate: z.string().optional(),
         city: z.string().default(""),
         venue: z.string().default(""),
+        budget: z.string().optional(),
         message: z.string().optional(),
       }),
     )
@@ -262,6 +283,7 @@ const enquiriesRouter = router({
         eventDate: input.eventDate || null,
         city: input.city,
         venue: input.venue,
+        budget: input.budget || "",
         message: input.message || null,
       }),
     ),

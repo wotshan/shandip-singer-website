@@ -26,6 +26,9 @@ export const resourceTables = {
   highlights: schema.highlights,
   fanMessages: schema.fanMessages,
   pressMentions: schema.pressMentions,
+  tracks: schema.tracks,
+  videos: schema.videos,
+  faqs: schema.faqs,
 } as const;
 
 export type ResourceName = keyof typeof resourceTables;
@@ -104,6 +107,7 @@ export async function createEnquiry(values: {
   eventDate?: string | null;
   city: string;
   venue: string;
+  budget?: string | null;
   message?: string | null;
 }) {
   const rows = (await db
@@ -116,6 +120,7 @@ export async function createEnquiry(values: {
       eventDate: values.eventDate ?? null,
       city: values.city,
       venue: values.venue,
+      budget: values.budget ?? "",
       message: values.message ?? null,
     })
     .returning()) as any[];
@@ -180,6 +185,9 @@ export async function getSiteContent(): Promise<SiteContent> {
     highlights,
     fanMessages,
     pressMentions,
+    tracks,
+    videos,
+    faqs,
   ] = await Promise.all([
     getSettings(),
     listResource("socials"),
@@ -196,6 +204,9 @@ export async function getSiteContent(): Promise<SiteContent> {
     listResource("highlights"),
     listResource("fanMessages"),
     listResource("pressMentions"),
+    listResource("tracks"),
+    listResource("videos"),
+    listResource("faqs"),
   ]);
 
   return {
@@ -227,5 +238,8 @@ export async function getSiteContent(): Promise<SiteContent> {
     highlights,
     fanMessages,
     pressMentions,
+    tracks,
+    videos,
+    faqs,
   };
 }

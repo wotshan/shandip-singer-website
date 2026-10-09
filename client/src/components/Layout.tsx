@@ -5,6 +5,7 @@ import { MailGlyph, PhoneGlyph, SOCIAL_GLYPHS, WhatsAppGlyph } from "./icons";
 import { cn } from "@/lib/utils";
 import { navItems, type SocialKey } from "@/data/site";
 import { useSiteContent } from "@/content/SiteContentProvider";
+import { ScrollProgress } from "./ScrollProgress";
 
 /* ── Brand mark ─────────────────────────────────────────────────────────── */
 
@@ -271,6 +272,7 @@ export function Footer() {
 export function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col bg-background">
+      <ScrollProgress />
       <Nav />
       <main className="flex-1 pt-16 sm:pt-20">{children}</main>
       <Footer />

@@ -21,6 +21,10 @@ import { PressSection } from "@/components/PressSection";
 import { CollaborationsSection } from "@/components/CollaborationsSection";
 import { FanZone } from "@/components/FanZone";
 import { NewsletterSignup } from "@/components/NewsletterSignup";
+import { MusicPlayer } from "@/components/MusicPlayer";
+import { VideoReel } from "@/components/VideoReel";
+import { FaqAccordion } from "@/components/FaqAccordion";
+import { SocialFeedGrid } from "@/components/SocialFeedGrid";
 import { useSiteContent } from "@/content/SiteContentProvider";
 
 /** Shared section shell so vertical rhythm is identical everywhere. */
@@ -120,6 +124,9 @@ export default function Home() {
         </Reveal>
       </Section>
 
+      {/* ── Custom audio player ── */}
+      <MusicPlayer />
+
       {/* ── Gallery ───────────────────────────────────────────────────────── */}
       <Section id="gallery" className="border-t border-border-subtle">
         <Reveal>
@@ -144,6 +151,9 @@ export default function Home() {
           </Link>
         </Reveal>
       </Section>
+
+      {/* ── Cinematic video reel ── */}
+      <VideoReel />
 
       {/* ── Awards, press & collaborations ────────────────────────────────── */}
       <AwardsSection />
@@ -188,6 +198,9 @@ export default function Home() {
 
       {/* ── Fan zone ──────────────────────────────────────────────────────── */}
       <FanZone />
+
+      {/* ── FAQ accordion ── */}
+      <FaqAccordion />
 
       {/* ── Enquiry ───────────────────────────────────────────────────────── */}
       <Section id="enquiry" className="border-t border-border-subtle">
@@ -249,6 +262,8 @@ export default function Home() {
       </Section>
 
       {/* ── Social carousel ───────────────────────────────────────────────── */}
+      <SocialFeedGrid />
+
       <section
         aria-label={`Follow ${settings.artist}`}
         className="border-t border-border-subtle bg-surface-1 py-14 sm:py-20"

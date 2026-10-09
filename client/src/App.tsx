@@ -1,5 +1,6 @@
 import { Switch, Route } from "wouter";
 import { Layout } from "./components/Layout";
+import { PageTransition } from "./components/PageTransition";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import { OccasionsPage } from "./pages/About";
@@ -21,7 +22,8 @@ import NotFound from "./pages/NotFound";
 export default function App() {
   return (
     <Layout>
-      <Switch>
+      <PageTransition>
+        <Switch>
         <Route path="/" component={Home} />
         <Route path="/about" component={About} />
         <Route path="/events" component={Events} />
@@ -33,7 +35,8 @@ export default function App() {
         <Route path="/admin/login" component={AdminLogin} />
         <Route path="/admin" component={AdminDashboard} />
         <Route component={NotFound} />
-      </Switch>
+        </Switch>
+      </PageTransition>
     </Layout>
   );
 }
