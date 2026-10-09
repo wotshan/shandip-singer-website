@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="docs/banner.svg" alt="SHANDIP animated banner" width="100%" />
+  <img src="docs/banner.svg" alt="Raag Sargam animated banner" width="100%" />
 </p>
 
-<h1 align="center">SHANDIP</h1>
+<h1 align="center">RAAG SARGAM</h1>
 <p align="center"><strong>Premium cinematic singer website for a live performer brand.</strong></p>
 
 <p align="center">
@@ -29,13 +29,16 @@
 
 ## Overview
 
-This repository contains the real codebase for **SHANDIP**, a dark editorial artist website built as a polished React application rather than a static mockup. It focuses on a premium stage aesthetic: almost-black surfaces, restrained deep-red gradients, large serif-led typography, cinematic spacing, subtle motion, and accessible interaction patterns.
+This repository contains the real codebase for **Raag Sargam**, a dark editorial artist website built as a polished full-stack React application rather than a static mockup. It focuses on a premium stage aesthetic: almost-black surfaces, restrained deep-red gradients, large serif-led typography, cinematic spacing, subtle motion, and accessible interaction patterns.
 
 The current build includes:
 
 - a multi-route public website
+- a cinematic entry animation that plays on every visit
+- a custom brand logo used in the header, the intro and the favicon
 - a homepage with hero, marquee, music, gallery, occasions, availability, enquiry, testimonials and contact sections
 - a dedicated `/gallery` route with real performance photography
+- a single-admin dashboard (`/admin`) that edits every piece of site content
 - real public contact links
 - accessible motion with reduced-motion support
 - GitHub Actions CI for `pnpm typecheck` and `pnpm test`
@@ -43,7 +46,7 @@ The current build includes:
 > Honest note: GitHub README files cannot run JavaScript, so a truly interactive or 60fps script-driven README is **not possible** on GitHub. This README uses **GitHub-safe animated SVG assets** plus a **real captured demo GIF** from the live site preview.
 
 <p align="center">
-  <img src="docs/demo.gif" alt="Real captured demo GIF of the SHANDIP website" width="100%" />
+  <img src="docs/demo.gif" alt="Real captured demo GIF of the Raag Sargam website" width="100%" />
 </p>
 
 <p align="center">
@@ -53,7 +56,11 @@ The current build includes:
 ## Features
 
 - **Premium cinematic visual system** with dark editorial styling
+- **Cinematic intro animation** — a dark, faded curtain that reveals the brand mark and dissolves into the site on every visit
+- **Custom brand logo** — a minimalist soundwave-and-note emblem, used in the header, the intro overlay and the favicon
 - **Responsive multi-page experience** across home, about, events, music, gallery, occasions, availability and contact
+- **Single-admin dashboard** with full create / edit / delete over profile, gallery, social links, events, music, occasions, testimonials, availability and the enquiries inbox
+- **Server-rendered content** — every admin edit appears on the public site immediately
 - **Real gallery media** using the artist's uploaded performance photos, optimized and served locally
 - **Accessible lightbox** with keyboard navigation, focus trapping and mobile-friendly interaction
 - **Real contact links** for WhatsApp, phone, email and social platforms
@@ -70,6 +77,9 @@ The current build includes:
 | Styling | Tailwind CSS v4 |
 | Build Tool | Vite |
 | Routing | wouter |
+| API | tRPC + Hono |
+| Database | Postgres (Drizzle ORM) |
+| Auth | Local, single admin (bcrypt + signed session cookie) |
 | Testing | Vitest |
 | Icons | lucide-react + inline SVG brand glyphs |
 | CI | GitHub Actions |
@@ -80,15 +90,15 @@ All screenshots below are **real captures from the actual running site**, taken 
 
 ### Home hero
 
-![SHANDIP home hero](docs/home-hero.png)
+![Raag Sargam home hero](docs/home-hero.png)
 
 ### Gallery route
 
-![SHANDIP gallery route](docs/gallery-page.png)
+![Raag Sargam gallery route](docs/gallery-page.png)
 
 ### Contact route
 
-![SHANDIP contact route](docs/contact-page.png)
+![Raag Sargam contact route](docs/contact-page.png)
 
 <p align="center">
   <img src="docs/divider-wave.svg" alt="Animated divider" width="100%" />
@@ -133,13 +143,21 @@ client/
   public/
     images/
       gallery/              optimized local WebP gallery images
+    favicon.png             brand mark used as the site favicon
   src/
-    components/             reusable UI building blocks
-    data/                   site content and structured page data
+    components/             reusable UI building blocks (incl. Intro.tsx)
+    components/admin/       dashboard editors (settings, resources, uploads)
+    content/                site-content provider (server-backed + fallback)
+    data/                   static fallback content and structured page data
     lib/                    utilities
     pages/                  route-level page components
     index.css               design tokens, layout rules and motion system
-server/                     scaffold server code (public site currently frontend-led)
+server/
+  admin.ts                  single-admin bootstrap + login rate limiting
+  db.ts                     Drizzle data access for the content store
+  routers.ts                tRPC API surface (public read, admin write)
+  _core/                    scaffold: auth, sessions, storage, tRPC plumbing
+drizzle/                    schema + generated migrations
 shared/                     shared types and constants
 docs/                       README assets (screenshots, animated SVGs, demo GIF)
 .github/workflows/          CI workflow
@@ -157,6 +175,24 @@ docs/                       README assets (screenshots, animated SVGs, demo GIF)
 | `/occasions` | Occasion and performance offerings |
 | `/availability` | Availability calendar |
 | `/contact` | Contact details and enquiry form |
+| `/admin/login` | Single-admin sign-in |
+| `/admin` | Admin dashboard (protected) |
+
+## Admin Dashboard
+
+The site has **exactly one admin** and **no signup** — the account is bootstrapped server-side and the only way in is the rate-limited login. From `/admin` the owner can create, edit and delete:
+
+- **Artist profile** — name, role, tagline, intros and contact details
+- **Gallery** — performance photos (with upload)
+- **Social links** — every channel shown across the site
+- **Events** — confirmed performances
+- **Music** — set types and repertoire
+- **Occasions** — the kinds of events performed at
+- **Testimonials** — genuine, permitted client quotes
+- **Availability** — the booking calendar
+- **Enquiries** — the inbox of messages from the public contact form
+
+Security: the password is stored only as a **bcrypt hash** server-side (never in the repo or the database as plaintext), every write goes through a server-side `adminProcedure` role check, and the login endpoint is **rate-limited** to blunt brute-force attempts.
 
 ## Design System
 
@@ -210,6 +246,6 @@ These are the real public contact channels currently wired into the site:
 
 Released under the **MIT License** — see the [`LICENSE`](LICENSE) file for the full text.
 
-**Copyright (c) 2026 SHANDIP.** The source code is free to use, modify and distribute under the terms of the MIT License.
+**Copyright (c) 2026 Raag Sargam.** The source code is free to use, modify and distribute under the terms of the MIT License.
 
-> **A note on the brand.** The MIT License covers the **code** in this repository. The **SHANDIP name, logo, imagery, photography and brand identity** remain the property of SHANDIP and are not granted for reuse by this license. If you would like to feature, license or collaborate with the brand, reach out through the [Contact](#contact) channels above.
+> **A note on the brand.** The MIT License covers the **code** in this repository. The **Raag Sargam name, logo, imagery, photography and brand identity** remain the property of Raag Sargam and are not granted for reuse by this license. If you would like to feature, license or collaborate with the brand, reach out through the [Contact](#contact) channels above.

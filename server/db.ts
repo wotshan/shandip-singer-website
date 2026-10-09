@@ -1,5 +1,5 @@
 // ── AGENT-OWNED: business data-access ────────────────────────────────────────
-// All Drizzle queries for the SHANDIP content store live here so the tRPC
+// All Drizzle queries for the Raag Sargam content store live here so the tRPC
 // procedures in routers.ts stay thin. The site is single-tenant: content rows
 // are the site's content (not owner-scoped), writes are gated by adminProcedure.
 import { asc, desc, eq } from "drizzle-orm";
@@ -150,7 +150,7 @@ export async function getSiteContent(): Promise<SiteContent> {
 
   return {
     settings: {
-      artist: settings?.artist ?? "SHANDIP",
+      artist: settings?.artist ?? "Raag Sargam",
       role: settings?.role ?? "Professional Singer & Live Performer",
       tagline: settings?.tagline ?? "",
       shortIntro: settings?.shortIntro ?? "",

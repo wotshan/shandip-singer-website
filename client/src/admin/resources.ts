@@ -78,7 +78,7 @@ export const RESOURCES: ResourceDef[] = [
       { name: "label", label: "Label", type: "text", required: true, placeholder: "Instagram" },
       { name: "value", label: "Display value", type: "text", placeholder: "@shaan.islive" },
       { name: "href", label: "Link", type: "text", required: true, full: true, placeholder: "https://instagram.com/shaan.islive/" },
-      { name: "handle", label: "Spoken label", type: "text", full: true, help: "Read aloud by screen readers, e.g. “Follow SHANDIP on Instagram”." },
+      { name: "handle", label: "Spoken label", type: "text", full: true, help: "Read aloud by screen readers, e.g. “Follow Raag Sargam on Instagram”." },
       { name: "external", label: "Opens in a new tab", type: "checkbox" },
       { name: "sortOrder", label: "Order", type: "number" },
     ],
@@ -125,7 +125,7 @@ export const RESOURCES: ResourceDef[] = [
     key: "occasions",
     label: "Occasions",
     singular: "occasion",
-    description: "The kinds of events SHANDIP performs at.",
+    description: "The kinds of events Raag Sargam performs at.",
     titleField: "title",
     subtitleField: "blurb",
     fields: [

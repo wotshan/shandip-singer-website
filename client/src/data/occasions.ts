@@ -1,4 +1,4 @@
-// Fallback occasions \u2014 the kinds of events SHANDIP performs at.
+// Fallback occasions \u2014 the kinds of events Raag Sargam performs at.
 import type { OccasionItem } from "@shared/types";
 
 export const fallbackOccasions: OccasionItem[] = [

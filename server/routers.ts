@@ -3,7 +3,7 @@
 // provided by _core — do NOT reimplement sessions. Access levels:
 // publicProcedure (anyone) / protectedProcedure (ctx.user set) / adminProcedure.
 //
-// SHANDIP has exactly ONE admin and NO signup: the account is bootstrapped
+// Raag Sargam has exactly ONE admin and NO signup: the account is bootstrapped
 // server-side (server/admin.ts) and the only way in is `admin.login`, which is
 // rate-limited. Every content write goes through `adminProcedure`.
 import { z } from "zod";

@@ -45,7 +45,7 @@ export async function ensureAdminUser(): Promise<void> {
   await db.insert(users).values({
     email: ADMIN_USERNAME,
     passwordHash: ADMIN_PASSWORD_HASH,
-    name: "SHANDIP",
+    name: "Raag Sargam",
     role: "admin",
   });
 }

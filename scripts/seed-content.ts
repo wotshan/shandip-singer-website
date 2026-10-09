@@ -1,4 +1,4 @@
-// One-time content seed for the SHANDIP site.
+// One-time content seed for the Raag Sargam site.
 //
 // Idempotent: it only runs when `site_settings` is empty, so re-running it never
 // clobbers content the admin has since edited. Everything here is REAL — the
@@ -25,17 +25,17 @@ async function main() {
     return;
   }
 
-  console.log("[seed] seeding real SHANDIP content…");
+  console.log("[seed] seeding real Raag Sargam content…");
 
   await db.insert(schema.siteSettings).values({
     id: "main",
-    artist: "SHANDIP",
+    artist: "Raag Sargam",
     role: "Professional Singer & Live Performer",
     tagline: "YOUR OCCASION. MY VOICE. ONE UNFORGETTABLE NIGHT.",
     shortIntro:
       "A professional live singer performing at weddings, receptions, private parties, clubs, corporate events, college festivals and special occasions.",
     longIntro:
-      "SHANDIP is a professional singer and live performer who has spent years on stage turning rooms into moments people remember. From the first note of a wedding entrance to the last chorus of a late-night club set, every performance is shaped around the occasion — the people in the room, the mood they came for, and the songs they will not stop talking about afterwards.",
+      "Raag Sargam is a professional singer and live performer who has spent years on stage turning rooms into moments people remember. From the first note of a wedding entrance to the last chorus of a late-night club set, every performance is shaped around the occasion — the people in the room, the mood they came for, and the songs they will not stop talking about afterwards.",
     email: "shandip8638@gmail.com",
     phoneDisplay: "+91 93653 95136",
     phoneHref: "tel:+919365395136",
@@ -46,14 +46,14 @@ async function main() {
   });
 
   await db.insert(schema.socialLinks).values([
-    { key: "whatsapp", label: "WhatsApp", value: "+91 62915 67770", href: "https://wa.me/916291567770", handle: "Message SHANDIP on WhatsApp", external: true, sortOrder: 0 },
-    { key: "instagram", label: "Instagram", value: "@shaan.islive", href: "https://instagram.com/shaan.islive/", handle: "Follow SHANDIP on Instagram", external: true, sortOrder: 1 },
-    { key: "linktree", label: "Linktree", value: "All links in one place", href: "https://linktr.ee/winewithshan", handle: "Open SHANDIP's Linktree", external: true, sortOrder: 2 },
-    { key: "discord", label: "Discord", value: "Join the community", href: "https://discord.gg/kMANJukS7", handle: "Join SHANDIP's Discord server", external: true, sortOrder: 3 },
-    { key: "linkedin", label: "LinkedIn", value: "Professional profile", href: "https://www.linkedin.com/in/shandip-das-834410417", handle: "Connect with SHANDIP on LinkedIn", external: true, sortOrder: 4 },
-    { key: "facebook", label: "Facebook", value: "Follow the page", href: "https://www.facebook.com/share/14qmhb5r3UX/", handle: "Follow SHANDIP on Facebook", external: true, sortOrder: 5 },
-    { key: "email", label: "Email", value: "shandip8638@gmail.com", href: "mailto:shandip8638@gmail.com", handle: "Email SHANDIP at shandip8638@gmail.com", external: false, sortOrder: 6 },
-    { key: "phone", label: "Phone", value: "+91 93653 95136", href: "tel:+919365395136", handle: "Call SHANDIP on +91 93653 95136", external: false, sortOrder: 7 },
+    { key: "whatsapp", label: "WhatsApp", value: "+91 62915 67770", href: "https://wa.me/916291567770", handle: "Message Raag Sargam on WhatsApp", external: true, sortOrder: 0 },
+    { key: "instagram", label: "Instagram", value: "@shaan.islive", href: "https://instagram.com/shaan.islive/", handle: "Follow Raag Sargam on Instagram", external: true, sortOrder: 1 },
+    { key: "linktree", label: "Linktree", value: "All links in one place", href: "https://linktr.ee/winewithshan", handle: "Open Raag Sargam's Linktree", external: true, sortOrder: 2 },
+    { key: "discord", label: "Discord", value: "Join the community", href: "https://discord.gg/kMANJukS7", handle: "Join Raag Sargam's Discord server", external: true, sortOrder: 3 },
+    { key: "linkedin", label: "LinkedIn", value: "Professional profile", href: "https://www.linkedin.com/in/shandip-das-834410417", handle: "Connect with Raag Sargam on LinkedIn", external: true, sortOrder: 4 },
+    { key: "facebook", label: "Facebook", value: "Follow the page", href: "https://www.facebook.com/share/14qmhb5r3UX/", handle: "Follow Raag Sargam on Facebook", external: true, sortOrder: 5 },
+    { key: "email", label: "Email", value: "shandip8638@gmail.com", href: "mailto:shandip8638@gmail.com", handle: "Email Raag Sargam at shandip8638@gmail.com", external: false, sortOrder: 6 },
+    { key: "phone", label: "Phone", value: "+91 93653 95136", href: "tel:+919365395136", handle: "Call Raag Sargam on +91 93653 95136", external: false, sortOrder: 7 },
   ]);
 
   await db.insert(schema.galleryItems).values([
@@ -62,7 +62,7 @@ async function main() {
     { src: "/images/gallery/gallery_acoustic_03.webp", width: 788, height: 1400, caption: "Artist portrait", tag: "Portrait", alt: "Portrait of the artist in glasses against a plain backdrop", sortOrder: 2 },
   ]);
 
-  // Set types SHANDIP performs — descriptive of the service, with no invented
+  // Set types Raag Sargam performs — descriptive of the service, with no invented
   // streaming links or track durations.
   await db.insert(schema.musicItems).values([
     { title: "Acoustic Covers", category: "Acoustic Covers", blurb: "Stripped-back guitar and vocals — the quiet half of an evening.", sortOrder: 0 },

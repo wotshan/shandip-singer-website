@@ -22,6 +22,13 @@
       "when": 1791565987190,
       "tag": "0002_magical_kingpin",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791572570347,
+      "tag": "0003_loose_talon",
+      "breakpoints": true
     }
   ]
 }

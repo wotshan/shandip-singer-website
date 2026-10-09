@@ -41,7 +41,7 @@ export function Hero() {
         </p>
 
         <h1
-          className="display text-[clamp(3.5rem,16vw,11rem)] text-foreground opacity-0"
+          className="display text-[clamp(2.75rem,12vw,9rem)] text-foreground opacity-0"
           style={{ animation: "fade-up 1s cubic-bezier(0.22,1,0.36,1) 0.25s forwards" }}
         >
           {settings.artist}

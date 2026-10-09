@@ -1,0 +1,1 @@
+ALTER TABLE "site_settings" ALTER COLUMN "artist" SET DEFAULT 'Raag Sargam';

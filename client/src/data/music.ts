@@ -1,4 +1,4 @@
-// Fallback repertoire \u2014 the set types SHANDIP performs.
+// Fallback repertoire \u2014 the set types Raag Sargam performs.
 // No streaming links or track durations are claimed, because none exist yet.
 import type { MusicItem } from "@shared/types";
 

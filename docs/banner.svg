@@ -1,5 +1,5 @@
 <svg width="1200" height="420" viewBox="0 0 1200 420" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
-  <title id="title">SHANDIP animated README banner</title>
+  <title id="title">Raag Sargam animated README banner</title>
   <desc id="desc">Animated dark cinematic banner with subtle red gradients, shimmer and editorial typography.</desc>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="420" gradientUnits="userSpaceOnUse">
@@ -29,7 +29,7 @@
     </filter>
     <style>
       .eyebrow { font: 600 18px Inter, Arial, sans-serif; letter-spacing: 0.34em; fill: #d7d7d7; opacity: 0.9; }
-      .title { font: 700 92px 'Cormorant Garamond', Georgia, serif; letter-spacing: 0.08em; fill: #ffffff; }
+      .title { font: 700 80px 'Cormorant Garamond', Georgia, serif; letter-spacing: 0.06em; fill: #ffffff; }
       .tagline { font: 500 26px Inter, Arial, sans-serif; fill: #c9c9c9; }
       .meta { font: 500 18px Inter, Arial, sans-serif; fill: #a8a8a8; }
       .line { stroke: rgba(255,255,255,0.12); stroke-width: 1; }
@@ -52,7 +52,7 @@
     <text x="84" y="78" class="eyebrow">LIVE PERFORMANCE WEBSITE</text>
   </g>
   <g>
-    <text x="84" y="190" class="title">SHANDIP</text>
+    <text x="84" y="190" class="title">RAAG SARGAM</text>
     <text x="84" y="238" class="tagline">Premium cinematic singer website built with React, TypeScript, Tailwind CSS and Vite.</text>
     <text x="84" y="286" class="meta">Real gallery photography • Real contact links • Accessible motion • GitHub Actions CI</text>
   </g>

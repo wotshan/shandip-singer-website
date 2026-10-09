@@ -63,7 +63,7 @@ export const files = pgTable(
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
-// BUSINESS TABLES — SHANDIP site content, all editable from the admin dashboard.
+// BUSINESS TABLES — Raag Sargam site content, all editable from the admin dashboard.
 //
 // Every table below is a single-tenant content store: the site has exactly one
 // owner (the admin), so rows are NOT owner-scoped — they are the site's content.
@@ -76,7 +76,7 @@ export const files = pgTable(
 /** Single-row table (id = 'main') holding the artist's scalar profile + copy. */
 export const siteSettings = pgTable("site_settings", {
   id: text("id").primaryKey().default("main"),
-  artist: text("artist").notNull().default("SHANDIP"),
+  artist: text("artist").notNull().default("Raag Sargam"),
   role: text("role").notNull().default("Professional Singer & Live Performer"),
   tagline: text("tagline").notNull().default(""),
   shortIntro: text("short_intro").notNull().default(""),

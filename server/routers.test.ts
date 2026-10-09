@@ -183,7 +183,7 @@ describe("admin.login", () => {
     vi.mocked(authProvider().login).mockResolvedValueOnce({
       id: "u_admin",
       email: "shanislive",
-      name: "SHANDIP",
+      name: "Raag Sargam",
       role: "admin",
     });
     const caller = makeCaller(anonymous);
@@ -288,7 +288,7 @@ describe("content write procedures", () => {
 describe("public procedures", () => {
   it("serves the site content bundle to anyone", async () => {
     vi.mocked(db.getSiteContent).mockResolvedValueOnce({
-      settings: { artist: "SHANDIP" },
+      settings: { artist: "Raag Sargam" },
       socials: [],
       gallery: [],
       events: [],
@@ -301,7 +301,7 @@ describe("public procedures", () => {
     const caller = makeCaller({ c: {} as never, db: {} as never, user: null });
     const content = await caller.content.getSite();
 
-    expect(content.settings.artist).toBe("SHANDIP");
+    expect(content.settings.artist).toBe("Raag Sargam");
   });
 
   it("accepts an enquiry from an anonymous visitor", async () => {

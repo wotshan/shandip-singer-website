@@ -18,9 +18,15 @@ function Wordmark({ compact = false }: { compact?: boolean }) {
     >
       <span
         aria-hidden="true"
-        className="grid h-9 w-9 place-items-center rounded-full border border-crimson/40 bg-crimson/10 font-display text-base text-crimson transition-colors group-hover:border-crimson/70 group-hover:bg-crimson/20"
+        className="grid h-9 w-9 place-items-center overflow-hidden rounded-full border border-crimson/40 bg-crimson/10 transition-colors group-hover:border-crimson/70"
       >
-        {settings.artist.charAt(0)}
+        <img
+          src="/images/raag_sargam_logo.png"
+          alt=""
+          width={36}
+          height={36}
+          className="h-full w-full object-cover"
+        />
       </span>
       <span className="flex flex-col leading-none">
         <span className="font-display text-lg tracking-[0.16em] text-foreground">
