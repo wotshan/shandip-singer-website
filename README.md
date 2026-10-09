@@ -204,6 +204,12 @@ These are the real public contact channels currently wired into the site:
 
 ## License
 
-No license file is currently included in this repository.
+<p align="center">
+  <img src="https://img.shields.io/badge/License-MIT-111111?style=for-the-badge&logo=opensourceinitiative&logoColor=white" alt="MIT License" />
+</p>
 
-If you want to open-source reuse beyond normal GitHub visibility, add an explicit `LICENSE` file first.
+Released under the **MIT License** — see the [`LICENSE`](LICENSE) file for the full text.
+
+**Copyright (c) 2026 SHANDIP.** The source code is free to use, modify and distribute under the terms of the MIT License.
+
+> **A note on the brand.** The MIT License covers the **code** in this repository. The **SHANDIP name, logo, imagery, photography and brand identity** remain the property of SHANDIP and are not granted for reuse by this license. If you would like to feature, license or collaborate with the brand, reach out through the [Contact](#contact) channels above.
