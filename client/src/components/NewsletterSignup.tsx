@@ -38,6 +38,7 @@ export function NewsletterSignup() {
         <Reveal variant="scale">
           <div className="relative overflow-hidden rounded-3xl border border-border-subtle bg-surface-2 px-6 py-14 sm:px-12 sm:py-16">
             <div aria-hidden="true" className="ambience absolute inset-0 opacity-50" />
+            <div aria-hidden="true" className="grid-dots absolute inset-0 opacity-60" />
             <div className="relative grid gap-10 lg:grid-cols-[1.1fr_1fr] lg:items-center">
               <div>
                 <p className="eyebrow mb-4">Fan club</p>
@@ -68,7 +69,7 @@ export function NewsletterSignup() {
                         onChange={(e) => setName(e.target.value)}
                         placeholder="Your name (optional)"
                         aria-label="Your name"
-                        className="w-full rounded-full border border-border-subtle bg-background/60 px-5 py-3 text-sm text-foreground placeholder:text-ink-faint focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 sm:w-2/5"
+                        className="w-full rounded-full border border-border-subtle bg-background/60 px-5 py-3 text-sm text-foreground placeholder:text-ink-faint focus:outline-none focus-visible:ring-2 focus-visible:ring-crimson/60 sm:w-2/5"
                       />
                       <input
                         type="email"
@@ -77,13 +78,13 @@ export function NewsletterSignup() {
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="you@email.com"
                         aria-label="Your email"
-                        className="w-full rounded-full border border-border-subtle bg-background/60 px-5 py-3 text-sm text-foreground placeholder:text-ink-faint focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
+                        className="w-full rounded-full border border-border-subtle bg-background/60 px-5 py-3 text-sm text-foreground placeholder:text-ink-faint focus:outline-none focus-visible:ring-2 focus-visible:ring-crimson/60"
                       />
                     </div>
                     <button
                       type="submit"
                       disabled={createM.isPending}
-                      className="inline-flex w-full items-center justify-center gap-2.5 rounded-full bg-foreground px-7 py-3.5 text-[0.8125rem] font-semibold uppercase tracking-[0.14em] text-background transition-colors hover:bg-gold hover:text-black disabled:opacity-60"
+                      className="mono inline-flex w-full items-center justify-center gap-2.5 rounded-full bg-foreground px-7 py-3.5 text-[0.75rem] font-semibold uppercase tracking-[0.16em] text-background transition-colors duration-300 hover:bg-crimson hover:text-white disabled:opacity-60"
                     >
                       {createM.isPending ? (
                         <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />

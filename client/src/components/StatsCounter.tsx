@@ -44,7 +44,7 @@ function Stat({ label, value, suffix, run }: { label: string; value: number; suf
     <div className="text-center">
       <p className="display text-[clamp(2.5rem,7vw,4.5rem)] text-foreground">
         {shown}
-        <span className="text-gold">{suffix}</span>
+        <span className="text-crimson">{suffix}</span>
       </p>
       <p className="mt-2 text-[0.6875rem] font-semibold uppercase tracking-[0.22em] text-ink-faint">
         {label}

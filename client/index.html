@@ -33,19 +33,47 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!--
+      Two families, deliberately: Inter is the neo-grotesque that carries every
+      heading and body line (Apple-leaning), JetBrains Mono carries the metadata
+      — dates, badges, counters, status labels (Nothing-OS-leaning). No serif:
+      the display voice is a tight-tracked grotesque, not a didone.
+    -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
+
+    <!--
+      Applied before first paint so a light-theme visitor never sees a dark
+      flash. Mirrors the STORAGE_KEY used by components/ThemeToggle.tsx.
+    -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("raag-sargam-theme");
+          var root = document.documentElement;
+          if (t === "light") {
+            root.classList.remove("dark");
+            root.classList.add("light");
+          } else {
+            root.classList.remove("light");
+            root.classList.add("dark");
+          }
+        } catch (e) {
+          /* storage unavailable — keep the dark default from the html tag */
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
     <noscript>
-      <div style="padding:2rem;color:#f5f5f5;background:#0a0a0a;font-family:sans-serif">
+      <div style="padding:2rem;color:#f5f5f7;background:#0a0a0a;font-family:sans-serif">
         <h1>Raag Sargam — Professional Singer &amp; Live Performer</h1>
         <p>
           This site needs JavaScript for the full experience. Reach out at
-          <a href="mailto:shandip8638@gmail.com" style="color:#e05a6a">shandip8638@gmail.com</a> to book
+          <a href="mailto:shandip8638@gmail.com" style="color:#d71920">shandip8638@gmail.com</a> to book
           a performance.
         </p>
       </div>

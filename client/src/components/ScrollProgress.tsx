@@ -3,11 +3,11 @@ import { ArrowUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
- * Reading-progress bar + back-to-top button.
+ * Reading-progress rail + back-to-top control.
  *
- * The bar is a single transform-scaled element updated inside a rAF, so a fast
- * scroll never queues more than one style write per frame. The button fades in
- * past the first viewport and scrolls home smoothly.
+ * The rail is a single transform-scaled element written inside a rAF, so a fast
+ * scroll never queues more than one style write per frame. The button sits
+ * above the booking trigger and fades in past the first viewport.
  */
 export function ScrollProgress() {
   const [progress, setProgress] = useState(0);
@@ -36,9 +36,9 @@ export function ScrollProgress() {
 
   return (
     <>
-      <div aria-hidden="true" className="fixed inset-x-0 top-0 z-[70] h-[3px] bg-transparent">
+      <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 z-[70] h-0.5 bg-transparent">
         <div
-          className="h-full origin-left bg-gradient-to-r from-crimson via-ember to-gold"
+          className="h-full origin-left bg-crimson"
           style={{ transform: `scaleX(${progress})` }}
         />
       </div>
@@ -48,7 +48,7 @@ export function ScrollProgress() {
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
         aria-label="Back to top"
         className={cn(
-          "fixed bottom-6 right-6 z-[60] grid h-11 w-11 place-items-center rounded-full border border-border-strong bg-surface-2/90 text-foreground shadow-lg backdrop-blur-md transition-all duration-400 hover:-translate-y-0.5 hover:border-gold/60 hover:bg-gold/10",
+          "fixed bottom-24 right-6 z-[60] grid h-11 w-11 place-items-center rounded-full border border-border-strong bg-background/85 text-muted-foreground shadow-lg backdrop-blur-xl transition-all duration-400 hover:-translate-y-0.5 hover:border-crimson/55 hover:text-foreground",
           showTop ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-4 opacity-0",
         )}
       >

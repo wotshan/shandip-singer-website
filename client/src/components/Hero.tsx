@@ -1,24 +1,33 @@
 import { Link } from "wouter";
-import { ArrowRight, Play, Ticket } from "lucide-react";
+import { ArrowRight, Music2, Ticket } from "lucide-react";
 import { useSiteContent } from "@/content/SiteContentProvider";
 import { PressMentionsStrip } from "./PressMentionsStrip";
+import { Spotlight } from "./Spotlight";
+import { Waveform } from "./Waveform";
+import { StatusDot } from "./StatusDot";
+import { GridBackdrop } from "./GridBackdrop";
 
 /**
- * Cinematic hero.
+ * Hero.
  *
- * The headline is the artist name set large in the display face; the visual is a
- * real photograph behind a heavy dark overlay so the type always sits on a
- * readable surface. A slow spotlight sweep and a gentle push-in give it a
- * star-level, stage-lit feel — both are transform/opacity only, so they
- * composite on the GPU and cost nothing on a phone.
+ * The thesis: this is a working stage act, so the first thing on screen is the
+ * stage — a real performance photograph under a slow spotlight sweep, the name
+ * set enormous in a tight grotesque, and a waveform preview of the player one
+ * scroll below. A cursor-follow spotlight layers on top for pointer users.
+ *
+ * Nothing-OS on top: a dot matrix behind the type, a breathing LED "live" tag,
+ * and monospaced metadata for the role and the tour footprint.
+ *
+ * Every motion is opacity/transform/filter only — nothing here touches layout —
+ * so the whole hero composites on the GPU and stays smooth on a phone.
  */
 export function Hero() {
-  const { settings } = useSiteContent();
+  const { settings, stats } = useSiteContent();
 
   return (
     <section
       aria-label="Introduction"
-      className="relative isolate flex min-h-[92svh] items-end overflow-hidden grain"
+      className="relative isolate flex min-h-[86svh] items-end overflow-hidden bg-surface-0 grain"
     >
       {/* Performance photograph */}
       <img
@@ -32,51 +41,68 @@ export function Hero() {
       {/* Layered dark overlays — bottom fade into the page + red ambience */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 -z-10 bg-gradient-to-t from-background via-background/85 to-background/45"
+        className="absolute inset-0 -z-10 bg-gradient-to-t from-background via-background/88 to-background/40"
       />
-      <div aria-hidden="true" className="ambience absolute inset-0 -z-10 opacity-80" />
-      {/* Slow spotlight sweep — a soft cone of light drifting across the stage */}
-      <div aria-hidden="true" className="hero-spotlight absolute inset-0 -z-10" />
+      <div aria-hidden="true" className="ambience absolute inset-0 -z-10 opacity-75" />
 
-      <div className="mx-auto w-full max-w-7xl px-5 pb-16 pt-32 sm:px-8 sm:pb-24">
-        <p
-          className="eyebrow mb-6 flex items-center gap-3 opacity-0"
-          style={{ animation: "fade-up 0.9s cubic-bezier(0.22,1,0.36,1) 0.1s forwards" }}
-        >
-          <span className="h-px w-10 bg-gold" aria-hidden="true" />
+      {/* Nothing-OS dot matrix, masked out at the edges */}
+      <GridBackdrop variant="dots" accent className="-z-10 opacity-70" />
+
+      {/* Slow stage spotlight + cursor-follow glow */}
+      <div aria-hidden="true" className="hero-spotlight absolute inset-0 -z-10" />
+      <Spotlight className="-z-10" />
+
+      <div className="relative mx-auto w-full max-w-7xl px-5 pb-16 pt-28 sm:px-8 sm:pb-24 sm:pt-36">
+        <p className="eyebrow blur-rise mb-6 flex items-center gap-3 text-crimson">
+          <StatusDot tone="accent" breathe />
           {settings.role}
         </p>
 
         <h1
-          className="display text-[clamp(2.75rem,12vw,9rem)] text-foreground opacity-0"
-          style={{ animation: "fade-up 1s cubic-bezier(0.22,1,0.36,1) 0.25s forwards" }}
+          className="display text-[clamp(2.25rem,9vw,6.75rem)] text-foreground"
+          style={{ animation: "blur-rise 1.1s cubic-bezier(0.16,1,0.3,1) 0.12s both" }}
         >
           {settings.artist}
         </h1>
 
-        <p
-          className="mt-7 max-w-2xl text-[clamp(1rem,2.4vw,1.375rem)] font-medium uppercase leading-relaxed tracking-[0.12em] text-muted-foreground opacity-0"
-          style={{ animation: "fade-up 1s cubic-bezier(0.22,1,0.36,1) 0.42s forwards" }}
-        >
-          {settings.tagline}
-        </p>
+        <div className="mt-10 flex max-w-4xl flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+          <p
+            className="max-w-2xl text-[clamp(1rem,2.2vw,1.25rem)] font-medium uppercase leading-relaxed tracking-[0.1em] text-muted-foreground"
+            style={{ animation: "blur-rise 1.1s cubic-bezier(0.16,1,0.3,1) 0.3s both" }}
+          >
+            {settings.tagline}
+          </p>
+
+          {/* Waveform preview of the player below. Decorative here — the player
+              itself is the interactive control. */}
+          <div
+            className="glass-panel shrink-0 rounded-2xl px-5 py-4 lg:w-[19rem]"
+            style={{ animation: "blur-rise 1.2s cubic-bezier(0.16,1,0.3,1) 0.42s both" }}
+          >
+            <p className="mono mb-3 flex items-center justify-between text-[0.625rem] uppercase tracking-[0.2em] text-ink-faint">
+              Live sound
+              <StatusDot tone="accent" breathe />
+            </p>
+            <Waveform progress={0.34} bars={34} height="h-9" />
+          </div>
+        </div>
 
         <div
-          className="mt-10 flex flex-col gap-3 opacity-0 sm:flex-row sm:items-center sm:gap-4"
-          style={{ animation: "fade-up 1s cubic-bezier(0.22,1,0.36,1) 0.58s forwards" }}
+          className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4"
+          style={{ animation: "blur-rise 1.1s cubic-bezier(0.16,1,0.3,1) 0.56s both" }}
         >
           <Link
             href="/contact"
-            className="group inline-flex items-center justify-center gap-2.5 rounded-full bg-foreground px-7 py-3.5 text-[0.8125rem] font-semibold uppercase tracking-[0.14em] text-background transition-all duration-300 hover:bg-gold hover:text-black"
+            className="group inline-flex items-center justify-center gap-2.5 rounded-full bg-foreground px-7 py-3.5 text-[0.8125rem] font-semibold uppercase tracking-[0.14em] text-background transition-all duration-300 hover:bg-crimson hover:text-white"
           >
             <Ticket className="h-4 w-4" aria-hidden="true" />
             Book for your event
           </Link>
           <Link
             href="/music"
-            className="group inline-flex items-center justify-center gap-2.5 rounded-full border border-border-strong bg-white/[0.03] px-7 py-3.5 text-[0.8125rem] font-semibold uppercase tracking-[0.14em] text-foreground backdrop-blur-sm transition-all duration-300 hover:border-gold/60 hover:bg-gold/10"
+            className="group inline-flex items-center justify-center gap-2.5 rounded-full border border-glass-border-strong bg-white/[0.03] px-7 py-3.5 text-[0.8125rem] font-semibold uppercase tracking-[0.14em] text-foreground backdrop-blur-sm transition-all duration-300 hover:border-crimson/55 hover:bg-crimson/10"
           >
-            <Play className="h-4 w-4" aria-hidden="true" />
+            <Music2 className="h-4 w-4" aria-hidden="true" />
             Explore my music
             <ArrowRight
               className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
@@ -85,14 +111,30 @@ export function Hero() {
           </Link>
         </div>
 
-        <p className="mt-10 text-xs uppercase tracking-[0.2em] text-ink-faint">
-          {settings.cities}
-        </p>
-
-        <div
-          className="opacity-0"
-          style={{ animation: "fade-up 1s cubic-bezier(0.22,1,0.36,1) 0.75s forwards" }}
+        {/* Monospaced fact strip — the real footprint, straight from settings. */}
+        <dl
+          className="mono mt-9 flex flex-wrap items-center gap-x-8 gap-y-3 text-[0.6875rem] uppercase tracking-[0.2em] text-ink-faint"
+          style={{ animation: "blur-rise 1.1s cubic-bezier(0.16,1,0.3,1) 0.68s both" }}
         >
+          <div className="flex items-center gap-2.5">
+            <dt className="sr-only">Based in</dt>
+            <dd>{settings.cities}</dd>
+          </div>
+          {stats.slice(0, 3).map((s) => (
+            <div key={s.id} className="flex items-center gap-2.5">
+              <dt className="sr-only">{s.label}</dt>
+              <dd>
+                <span className="text-foreground">
+                  {s.value}
+                  {s.suffix}
+                </span>{" "}
+                {s.label}
+              </dd>
+            </div>
+          ))}
+        </dl>
+
+        <div style={{ animation: "blur-rise 1.2s cubic-bezier(0.16,1,0.3,1) 0.8s both" }}>
           <PressMentionsStrip />
         </div>
       </div>

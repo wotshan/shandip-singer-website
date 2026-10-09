@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type ElementType, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-/** Which axis the element arrives on. All are transform/opacity only. */
-export type RevealVariant = "up" | "scale" | "left" | "right" | "fade";
+/** Which entrance a revealed element uses. All are transform/opacity only. */
+export type RevealVariant = "up" | "scale" | "left" | "right" | "fade" | "blur";
 
 type Props = {
   children: ReactNode;

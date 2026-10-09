@@ -2,7 +2,8 @@ import type { ReactNode } from "react";
 import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
 import { Hero } from "@/components/Hero";
-import { Marquee } from "@/components/Marquee";
+import { Ticker } from "@/components/Ticker";
+import { GridBackdrop } from "@/components/GridBackdrop";
 import { Reveal } from "@/components/Reveal";
 import { SectionHeading } from "@/components/SectionHeading";
 import { MusicCard } from "@/components/MusicCard";
@@ -27,19 +28,28 @@ import { FaqAccordion } from "@/components/FaqAccordion";
 import { SocialFeedGrid } from "@/components/SocialFeedGrid";
 import { useSiteContent } from "@/content/SiteContentProvider";
 
-/** Shared section shell so vertical rhythm is identical everywhere. */
+/**
+ * Shared section shell.
+ *
+ * Optional `backdrop` lays the Nothing-OS dot matrix or wire grid behind a
+ * section. The backdrop is always decorative and masked at the edges, so it
+ * never fights the type or ends on a hard line.
+ */
 function Section({
   id,
   children,
   className = "",
+  backdrop,
 }: {
   id?: string;
   children: ReactNode;
   className?: string;
+  backdrop?: "dots" | "wires";
 }) {
   return (
-    <section id={id} className={`mx-auto max-w-7xl px-5 py-20 sm:px-8 sm:py-28 ${className}`}>
-      {children}
+    <section id={id} className={`relative isolate overflow-hidden ${className}`}>
+      {backdrop ? <GridBackdrop variant={backdrop} /> : null}
+      <div className="relative mx-auto max-w-7xl px-5 py-20 sm:px-8 sm:py-28">{children}</div>
     </section>
   );
 }
@@ -50,11 +60,28 @@ export default function Home() {
   return (
     <>
       <Hero />
-      <Marquee />
+
+      {/* Kinetic metadata strip — a Nothing-OS ticker of what a booking covers. */}
+      <Ticker
+        duration="58s"
+        items={[
+          "Weddings",
+          "Receptions",
+          "Bollywood",
+          "Acoustic sets",
+          "Corporate nights",
+          "Romantic arrangements",
+          "Live sessions",
+          "College festivals",
+          "Private parties",
+          "Your event",
+        ]}
+      />
+
       <StatsCounter />
 
       {/* ── About ─────────────────────────────────────────────────────────── */}
-      <Section id="about">
+      <Section id="about" backdrop="wires" className="border-t border-border-subtle">
         <div className="grid gap-12 lg:grid-cols-[1fr_1.1fr] lg:gap-16">
           <Reveal variant="left">
             <SectionHeading
@@ -89,19 +116,20 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ── Tour / upcoming shows ─────────────────────────────────────────── */}
+      {/* ── Tour / upcoming shows ──────────────────────────────────────────── */}
       <TourSection />
 
-      {/* ── Featured highlights ───────────────────────────────────────────── */}
+      {/* ── Featured highlights ────────────────────────────────────────────── */}
       <HighlightsGrid />
 
-      {/* ── Music ─────────────────────────────────────────────────────────── */}
-      <Section id="music" className="border-t border-border-subtle">
+      {/* ── Music ──────────────────────────────────────────────────────────── */}
+      <Section id="music" backdrop="dots" className="border-t border-border-subtle">
         <Reveal>
           <SectionHeading
             eyebrow="Music"
             title="Sets, sessions & originals"
             intro="Acoustic covers, Bollywood, romantic arrangements and live sessions — the range a booking can draw from."
+            meta={music.length > 0 ? `${music.length} entries` : undefined}
           />
         </Reveal>
 
@@ -124,16 +152,17 @@ export default function Home() {
         </Reveal>
       </Section>
 
-      {/* ── Custom audio player ── */}
+      {/* ── Custom audio player ────────────────────────────────────────────── */}
       <MusicPlayer />
 
-      {/* ── Gallery ───────────────────────────────────────────────────────── */}
-      <Section id="gallery" className="border-t border-border-subtle">
+      {/* ── Gallery ────────────────────────────────────────────────────────── */}
+      <Section id="gallery" backdrop="dots" className="border-t border-border-subtle">
         <Reveal>
           <SectionHeading
             eyebrow="Gallery"
             title="Moments from the stage"
             intro="Photographs from live performances — the room, the lights and the songs in between."
+            meta={gallery.length > 0 ? `${gallery.length} frames` : undefined}
           />
         </Reveal>
 
@@ -152,16 +181,16 @@ export default function Home() {
         </Reveal>
       </Section>
 
-      {/* ── Cinematic video reel ── */}
+      {/* ── Cinematic video reel ───────────────────────────────────────────── */}
       <VideoReel />
 
-      {/* ── Awards, press & collaborations ────────────────────────────────── */}
+      {/* ── Awards, press & collaborations ─────────────────────────────────── */}
       <AwardsSection />
       <PressSection />
       <CollaborationsSection />
 
-      {/* ── Occasions ─────────────────────────────────────────────────────── */}
-      <Section id="occasions" className="border-t border-border-subtle">
+      {/* ── Occasions ───────────────────────────────────────────────────────── */}
+      <Section id="occasions" backdrop="wires" className="border-t border-border-subtle">
         <Reveal>
           <SectionHeading
             eyebrow="Occasions"
@@ -179,15 +208,19 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ── Availability ──────────────────────────────────────────────────── */}
-      <Section id="availability" className="border-t border-border-subtle">
+      {/* ── Availability ─────────────────────────────────────────────────────── */}
+      <Section id="availability" backdrop="dots" className="border-t border-border-subtle">
         <div className="grid gap-12 lg:grid-cols-[1fr_1.2fr] lg:gap-16">
           <Reveal variant="left">
             <SectionHeading
               eyebrow="Availability"
               title="Is your date open?"
-              intro="A live view of the booking calendar. Green dates are open; red ones are taken."
+              intro="A live view of the booking calendar. Green dates are open, red ones are taken, and amber is still in discussion."
             />
+            <div className="mt-8 rounded-2xl border border-glass-border bg-white/[0.03] p-6 backdrop-blur-sm">
+              <p className="eyebrow mb-4">Prefer to talk first?</p>
+              <ContactLinks />
+            </div>
           </Reveal>
 
           <Reveal variant="right" delay={1}>
@@ -196,14 +229,14 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ── Fan zone ──────────────────────────────────────────────────────── */}
+      {/* ── Fan zone ───────────────────────────────────────────────────────── */}
       <FanZone />
 
-      {/* ── FAQ accordion ── */}
+      {/* ── FAQ accordion ──────────────────────────────────────────────────── */}
       <FaqAccordion />
 
-      {/* ── Enquiry ───────────────────────────────────────────────────────── */}
-      <Section id="enquiry" className="border-t border-border-subtle">
+      {/* ── Enquiry ────────────────────────────────────────────────────────── */}
+      <Section id="enquiry" backdrop="wires" className="border-t border-border-subtle">
         <div className="grid gap-12 lg:grid-cols-[1fr_1.3fr] lg:gap-16">
           <Reveal variant="left">
             <SectionHeading
@@ -211,8 +244,8 @@ export default function Home() {
               title="Tell me about your event"
               intro="Share the essentials and the occasion. The more detail, the better the fit."
             />
-            <div className="mt-8 rounded-2xl border border-border-subtle bg-surface-2 p-6">
-              <p className="eyebrow mb-4">Prefer to talk first?</p>
+            <div className="mt-8 rounded-2xl border border-glass-border bg-white/[0.03] p-6 backdrop-blur-sm">
+              <p className="eyebrow mb-4">Direct channels</p>
               <ContactLinks />
             </div>
           </Reveal>
@@ -223,45 +256,51 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ── Testimonials ──────────────────────────────────────────────────── */}
+      {/* ── Testimonials ───────────────────────────────────────────────────── */}
       <div className="border-t border-border-subtle">
         <Testimonials />
       </div>
 
-      {/* ── Fan club / newsletter ─────────────────────────────────────────── */}
+      {/* ── Fan club / newsletter ──────────────────────────────────────────── */}
       <NewsletterSignup />
 
-      {/* ── Contact CTA ───────────────────────────────────────────────────── */}
+      {/* ── Contact CTA ────────────────────────────────────────────────────── */}
       <Section id="contact" className="border-t border-border-subtle">
         <Reveal variant="scale">
-          <div className="relative overflow-hidden rounded-3xl border border-border-subtle bg-surface-2 px-6 py-14 text-center sm:px-12 sm:py-20">
+          <div className="relative overflow-hidden rounded-3xl border border-glass-border bg-surface-1/60 px-6 py-16 text-center backdrop-blur-xl sm:px-12 sm:py-24">
             <div aria-hidden="true" className="ambience absolute inset-0 opacity-60" />
+            <div aria-hidden="true" className="grid-dots absolute inset-0 opacity-70" />
             <div className="relative">
-              <p className="eyebrow mb-5">Let's make it a night to remember</p>
+              <p className="eyebrow mb-5 flex items-center justify-center gap-3 text-crimson">
+                <span aria-hidden="true" className="led text-crimson led-breathe" />
+                Now booking
+              </p>
               <h2 className="display mx-auto max-w-3xl text-[clamp(2rem,6vw,4rem)] text-foreground">
                 {settings.tagline}
               </h2>
               <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
                 <Link
                   href="/contact"
-                  className="inline-flex items-center justify-center gap-2.5 rounded-full bg-foreground px-7 py-3.5 text-[0.8125rem] font-semibold uppercase tracking-[0.14em] text-background transition-colors hover:bg-crimson hover:text-white"
+                  className="mono inline-flex items-center justify-center gap-2.5 rounded-full bg-foreground px-7 py-3.5 text-[0.75rem] font-semibold uppercase tracking-[0.16em] text-background transition-all duration-300 hover:bg-crimson hover:text-white"
                 >
                   Book for your event
                 </Link>
                 <Link
                   href="/music"
-                  className="inline-flex items-center justify-center gap-2.5 rounded-full border border-border-strong px-7 py-3.5 text-[0.8125rem] font-semibold uppercase tracking-[0.14em] text-foreground transition-colors hover:border-crimson/60 hover:bg-crimson/10"
+                  className="mono inline-flex items-center justify-center gap-2.5 rounded-full border border-glass-border-strong bg-white/[0.04] px-7 py-3.5 text-[0.75rem] font-semibold uppercase tracking-[0.16em] text-foreground transition-all duration-300 hover:border-crimson/60 hover:bg-crimson/10"
                 >
                   Explore my music
                 </Link>
               </div>
-              <p className="mt-8 text-xs uppercase tracking-[0.2em] text-ink-faint">{settings.travelNote}</p>
+              <p className="mono mt-8 text-[0.6875rem] uppercase tracking-[0.2em] text-ink-faint">
+                {settings.travelNote}
+              </p>
             </div>
           </div>
         </Reveal>
       </Section>
 
-      {/* ── Social carousel ───────────────────────────────────────────────── */}
+      {/* ── Social feed grid ───────────────────────────────────────────────── */}
       <SocialFeedGrid />
 
       <section

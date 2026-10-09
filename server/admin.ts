@@ -16,6 +16,9 @@ import { users } from "../drizzle/schema";
  *  unique text field; the admin logs in with this name, not an email address). */
 export const ADMIN_USERNAME = "shanislive";
 
+/** Display name on the admin row, kept in step with the site's brand name. */
+const ADMIN_NAME = "Raag Sargam";
+
 /** bcrypt hash (cost 10) of the permanent admin password. One-way; the
  *  plaintext is deliberately absent from this repository. */
 const ADMIN_PASSWORD_HASH = "$2b$10$8LjdTxB8h7x1DyQ8PEjmmezfbMoZFI10PyjxF9U0sSaFM0XluZ3P.";
@@ -33,10 +36,14 @@ export async function ensureAdminUser(): Promise<void> {
     .limit(1);
 
   if (existing) {
-    if (existing.role !== "admin" || existing.passwordHash !== ADMIN_PASSWORD_HASH) {
+    if (
+      existing.role !== "admin" ||
+      existing.passwordHash !== ADMIN_PASSWORD_HASH ||
+      existing.name !== ADMIN_NAME
+    ) {
       await db
         .update(users)
-        .set({ role: "admin", passwordHash: ADMIN_PASSWORD_HASH })
+        .set({ role: "admin", passwordHash: ADMIN_PASSWORD_HASH, name: ADMIN_NAME })
         .where(eq(users.id, existing.id));
     }
     return;
@@ -45,7 +52,7 @@ export async function ensureAdminUser(): Promise<void> {
   await db.insert(users).values({
     email: ADMIN_USERNAME,
     passwordHash: ADMIN_PASSWORD_HASH,
-    name: "Raag Sargam",
+    name: ADMIN_NAME,
     role: "admin",
   });
 }

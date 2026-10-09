@@ -27,8 +27,8 @@ export function FanZone() {
         <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {fanMessages.map((f, i) => (
             <Reveal key={f.id} variant="scale" delay={((i % 3) + 1) as 1 | 2 | 3}>
-              <figure className="flex h-full flex-col rounded-3xl border border-border-subtle bg-surface-2 p-7 transition-colors hover:border-gold/40">
-                <Quote className="h-5 w-5 text-gold" aria-hidden="true" />
+              <figure className="flex h-full flex-col rounded-3xl border border-border-subtle bg-surface-2 p-7 transition-colors hover:border-crimson/40">
+                <Quote className="h-5 w-5 text-crimson" aria-hidden="true" />
                 <blockquote className="mt-4 flex-1 text-base leading-relaxed text-foreground/90">
                   {f.message}
                 </blockquote>

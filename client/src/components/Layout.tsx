@@ -1,13 +1,16 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { Menu, X } from "lucide-react";
+import { ArrowUpRight, Menu, X } from "lucide-react";
 import { MailGlyph, PhoneGlyph, SOCIAL_GLYPHS, WhatsAppGlyph } from "./icons";
 import { cn } from "@/lib/utils";
 import { navItems, type SocialKey } from "@/data/site";
 import { useSiteContent } from "@/content/SiteContentProvider";
 import { ScrollProgress } from "./ScrollProgress";
+import { BookingDrawer } from "./BookingDrawer";
+import { StatusDot } from "./StatusDot";
+import { GridBackdrop } from "./GridBackdrop";
 
-/* ── Brand mark ─────────────────────────────────────────────────────────── */
+/* ── Brand mark ─────────────────────────────────────────────────────────────── */
 
 function Wordmark({ compact = false }: { compact?: boolean }) {
   const { settings } = useSiteContent();
@@ -19,7 +22,7 @@ function Wordmark({ compact = false }: { compact?: boolean }) {
     >
       <span
         aria-hidden="true"
-        className="grid h-9 w-9 place-items-center overflow-hidden rounded-full border border-crimson/40 bg-crimson/10 transition-colors group-hover:border-crimson/70"
+        className="led-bloom grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full border border-crimson/35 text-crimson transition-colors group-hover:border-crimson/70"
       >
         <img
           src="/images/raag_sargam_logo.png"
@@ -30,11 +33,11 @@ function Wordmark({ compact = false }: { compact?: boolean }) {
         />
       </span>
       <span className="flex flex-col leading-none">
-        <span className="font-display text-lg tracking-[0.16em] text-foreground">
+        <span className="font-display text-[1.0625rem] font-semibold tracking-[-0.01em] text-foreground">
           {settings.artist}
         </span>
         {!compact ? (
-          <span className="mt-1 text-[0.5625rem] font-medium uppercase tracking-[0.26em] text-ink-faint">
+          <span className="mono mt-1 text-[0.5625rem] uppercase tracking-[0.24em] text-ink-faint">
             Singer · Live Performer
           </span>
         ) : null}
@@ -43,7 +46,7 @@ function Wordmark({ compact = false }: { compact?: boolean }) {
   );
 }
 
-/* ── Navigation ─────────────────────────────────────────────────────────── */
+/* ── Navigation ─────────────────────────────────────────────────────────────── */
 
 export function Nav() {
   const [location] = useLocation();
@@ -72,13 +75,15 @@ export function Nav() {
     <header
       className={cn(
         "fixed inset-x-0 top-0 z-50 transition-all duration-500",
-        scrolled ? "border-b border-border-subtle bg-background/80 backdrop-blur-xl" : "border-b border-transparent",
+        scrolled
+          ? "border-b border-glass-border bg-background/70 backdrop-blur-2xl"
+          : "border-b border-transparent",
       )}
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:h-20 sm:px-8">
         <Wordmark />
 
-        {/* Desktop nav */}
+        {/* Desktop nav — Nothing-style pill tabs with a 1px active border. */}
         <nav aria-label="Primary" className="hidden items-center gap-1 lg:flex">
           {navItems.map((item) => {
             const active = item.href === location;
@@ -88,27 +93,22 @@ export function Nav() {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "relative rounded-full px-4 py-2 text-[0.8125rem] font-medium tracking-wide transition-colors",
-                  active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                  "rounded-full border px-4 py-2 text-[0.8125rem] font-medium transition-all duration-300",
+                  active
+                    ? "border-glass-border-strong bg-white/[0.06] text-foreground"
+                    : "border-transparent text-muted-foreground hover:border-glass-border hover:text-foreground",
                 )}
               >
                 {item.label}
-                <span
-                  aria-hidden="true"
-                  className={cn(
-                    "absolute inset-x-4 -bottom-0.5 h-px origin-left bg-crimson transition-transform duration-300",
-                    active ? "scale-x-100" : "scale-x-0",
-                  )}
-                />
               </Link>
             );
           })}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <Link
             href="/contact"
-            className="hidden rounded-full border border-crimson/50 bg-crimson/10 px-5 py-2 text-[0.8125rem] font-medium text-foreground transition-colors hover:bg-crimson/20 sm:inline-flex"
+            className="hidden items-center gap-2 rounded-full border border-crimson/45 bg-crimson/10 px-5 py-2 text-[0.8125rem] font-semibold text-foreground transition-all duration-300 hover:border-crimson hover:bg-crimson hover:text-white sm:inline-flex"
           >
             Book an event
           </Link>
@@ -130,7 +130,7 @@ export function Nav() {
       <div
         id="mobile-nav"
         className={cn(
-          "overflow-hidden border-t border-border-subtle bg-background/95 backdrop-blur-xl transition-[max-height,opacity] duration-400 lg:hidden",
+          "overflow-hidden border-t border-glass-border bg-background/95 backdrop-blur-2xl transition-[max-height,opacity] duration-400 lg:hidden",
           open ? "max-h-[44rem] opacity-100" : "max-h-0 opacity-0",
         )}
       >
@@ -143,17 +143,18 @@ export function Nav() {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "border-b border-border-subtle py-3.5 font-display text-xl transition-colors last:border-b-0",
+                  "flex items-center justify-between border-b border-border-subtle py-3.5 font-display text-lg font-medium tracking-[-0.01em] transition-colors last:border-b-0",
                   active ? "text-crimson" : "text-foreground hover:text-crimson",
                 )}
               >
                 {item.label}
+                {active ? <StatusDot tone="accent" /> : null}
               </Link>
             );
           })}
           <Link
             href="/contact"
-            className="mt-4 rounded-full border border-crimson/50 bg-crimson/15 px-5 py-3 text-center text-sm font-medium text-foreground"
+            className="mt-4 rounded-full border border-crimson/45 bg-crimson/15 px-5 py-3 text-center text-sm font-semibold text-foreground"
           >
             Book an event
           </Link>
@@ -163,32 +164,38 @@ export function Nav() {
   );
 }
 
-/* ── Footer ─────────────────────────────────────────────────────────────── */
+/* ── Footer ─────────────────────────────────────────────────────────────────── */
 
 export function Footer() {
   const { settings, socials } = useSiteContent();
 
   return (
-    <footer className="relative border-t border-border-subtle bg-surface-1">
-      <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-16">
-        <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr]">
+    <footer className="relative overflow-hidden border-t border-border-subtle bg-surface-0">
+      <GridBackdrop variant="wires" />
+
+      <div className="relative mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-20">
+        <div className="grid gap-12 md:grid-cols-[1.5fr_1fr_1fr]">
           <div>
             <Wordmark compact />
-            <p className="mt-5 max-w-sm text-sm leading-relaxed text-muted-foreground">
+            <p className="mt-6 max-w-sm text-sm leading-relaxed text-muted-foreground">
               {settings.shortIntro}
             </p>
           </div>
 
           <nav aria-label="Footer">
-            <h2 className="eyebrow mb-4">Explore</h2>
-            <ul className="space-y-2.5">
+            <h2 className="eyebrow mb-5">Explore</h2>
+            <ul className="space-y-3">
               {navItems.map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                    className="group inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
                   >
                     {item.label}
+                    <ArrowUpRight
+                      aria-hidden="true"
+                      className="h-3 w-3 opacity-0 transition-all duration-300 group-hover:opacity-100"
+                    />
                   </Link>
                 </li>
               ))}
@@ -196,8 +203,8 @@ export function Footer() {
           </nav>
 
           <div>
-            <h2 className="eyebrow mb-4">Get in touch</h2>
-            <ul className="space-y-2.5">
+            <h2 className="eyebrow mb-5">Get in touch</h2>
+            <ul className="space-y-3">
               <li>
                 <a
                   href={`mailto:${settings.email}`}
@@ -233,7 +240,7 @@ export function Footer() {
             </ul>
 
             {/* Icon-only social row — the accessible name lives on the link. */}
-            <ul className="mt-6 flex flex-wrap items-center gap-2.5" aria-label="Social profiles">
+            <ul className="mt-7 flex flex-wrap items-center gap-2.5" aria-label="Social profiles">
               {socials
                 .filter((s) => s.external)
                 .map((s) => {
@@ -245,7 +252,7 @@ export function Footer() {
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label={s.handle}
-                        className="grid h-10 w-10 place-items-center rounded-full border border-border-subtle bg-surface-2 text-muted-foreground transition-all duration-300 hover:-translate-y-0.5 hover:border-crimson/50 hover:bg-crimson/10 hover:text-foreground"
+                        className="grid h-10 w-10 place-items-center rounded-full border border-glass-border bg-white/[0.03] text-muted-foreground transition-all duration-300 hover:-translate-y-0.5 hover:border-crimson/50 hover:text-foreground"
                       >
                         <Icon className="h-4 w-4" />
                       </a>
@@ -256,26 +263,32 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="rule my-10" />
+        <div className="rule my-12" />
 
-        <div className="flex flex-col gap-4 text-xs text-ink-faint sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} {settings.artist}. All rights reserved.</p>
-          <p>{settings.role}</p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="mono text-[0.6875rem] uppercase tracking-[0.18em] text-ink-faint">
+            © {new Date().getFullYear()} {settings.artist}
+          </p>
+          <p className="mono flex items-center gap-2.5 text-[0.6875rem] uppercase tracking-[0.18em] text-ink-faint">
+            <StatusDot tone="accent" breathe />
+            {settings.role}
+          </p>
         </div>
       </div>
     </footer>
   );
 }
 
-/* ── Shell ──────────────────────────────────────────────────────────────── */
+/* ── Shell ──────────────────────────────────────────────────────────────────── */
 
 export function Layout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-dvh flex-col bg-background">
+    <div className="relative flex min-h-dvh flex-col bg-background">
       <ScrollProgress />
       <Nav />
       <main className="flex-1 pt-16 sm:pt-20">{children}</main>
       <Footer />
+      <BookingDrawer />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-// Fallback gallery \u2014 the artist's own performance photographs.
+// Fallback gallery — the artist's own performance photographs.
 // Live content comes from the server; this mirrors the seeded rows.
 import type { GalleryItem } from "@shared/types";
 

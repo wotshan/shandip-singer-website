@@ -25,7 +25,7 @@ export function SocialFeedGrid() {
         <SectionHeading
           eyebrow="Follow"
           title={<span id="social-heading">Find me everywhere</span>}
-          intro={`New sets, behind-the-scenes clips and open dates \u2014 posted across these channels.`}
+          intro={`New sets, behind-the-scenes clips and open dates — posted across these channels.`}
         />
       </Reveal>
 
@@ -40,14 +40,14 @@ export function SocialFeedGrid() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={s.handle}
-                  className="group relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-border-subtle bg-surface-2 p-6 transition-colors hover:border-gold/40"
+                  className="group relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-border-subtle bg-surface-2 p-6 transition-colors hover:border-crimson/40"
                 >
                   <div aria-hidden="true" className="ambience absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-40" />
                   <div className="relative flex items-start justify-between">
-                    <span className="grid h-12 w-12 place-items-center rounded-full border border-border-subtle bg-surface-3 text-gold transition-colors group-hover:border-gold/50">
+                    <span className="grid h-12 w-12 place-items-center rounded-full border border-border-subtle bg-surface-3 text-crimson transition-colors group-hover:border-crimson/50">
                       <Icon className="h-5 w-5" />
                     </span>
-                    <ArrowUpRight className="h-5 w-5 text-ink-faint transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-gold" aria-hidden="true" />
+                    <ArrowUpRight className="h-5 w-5 text-ink-faint transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-crimson" aria-hidden="true" />
                   </div>
                   <div className="relative mt-8">
                     <p className="font-display text-2xl text-foreground">{s.label}</p>

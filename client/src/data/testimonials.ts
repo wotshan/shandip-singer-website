@@ -1,4 +1,4 @@
-// Fallback testimonials \u2014 deliberately EMPTY.
+// Fallback testimonials — deliberately EMPTY.
 //
 // No client has given permission to be quoted, and inventing reviews would be a
 // fabricated claim. The admin adds genuine, permitted quotes from the dashboard.

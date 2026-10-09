@@ -37,7 +37,7 @@ export const fallbackSettings: SiteSettings = {
   shortIntro:
     "A professional live singer performing at weddings, receptions, private parties, clubs, corporate events, college festivals and special occasions.",
   longIntro:
-    "Raag Sargam is a professional singer and live performer who has spent years on stage turning rooms into moments people remember. From the first note of a wedding entrance to the last chorus of a late-night club set, every performance is shaped around the occasion \u2014 the people in the room, the mood they came for, and the songs they will not stop talking about afterwards.",
+    "Raag Sargam is a professional singer and live performer who has spent years on stage turning rooms into moments people remember. From the first note of a wedding entrance to the last chorus of a late-night club set, every performance is shaped around the occasion — the people in the room, the mood they came for, and the songs they will not stop talking about afterwards.",
   email: "shandip8638@gmail.com",
   phoneDisplay: "+91 93653 95136",
   phoneHref: "tel:+919365395136",

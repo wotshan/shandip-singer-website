@@ -47,8 +47,8 @@ export function FaqAccordion() {
                     <span
                       aria-hidden="true"
                       className={cn(
-                        "grid h-8 w-8 shrink-0 place-items-center rounded-full border border-border-subtle text-gold transition-transform duration-400",
-                        isOpen && "rotate-45 border-gold/50 bg-gold/10",
+                        "grid h-8 w-8 shrink-0 place-items-center rounded-full border border-border-subtle text-crimson transition-transform duration-400",
+                        isOpen && "rotate-45 border-crimson/50 bg-crimson/10",
                       )}
                     >
                       <Plus className="h-4 w-4" />
@@ -58,7 +58,7 @@ export function FaqAccordion() {
                 <div
                   id={`faq-panel-${f.id}`}
                   className={cn(
-                    "grid transition-[grid-template-rows,opacity] duration-400 ease-out",
+                    "grid transition-[grid-template-rows,opacity] duration-[420ms] ease-out",
                     isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
                   )}
                 >

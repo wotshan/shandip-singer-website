@@ -42,7 +42,7 @@ export function VideoReel() {
         </Reveal>
         <Reveal delay={1} className="mt-10">
           <div className="rounded-3xl border border-dashed border-border-strong bg-surface-2 p-10 text-center">
-            <Play className="mx-auto h-8 w-8 text-gold/60" aria-hidden="true" />
+            <Play className="mx-auto h-8 w-8 text-crimson/50" aria-hidden="true" />
             <p className="mt-4 font-display text-2xl text-foreground">No videos published yet</p>
             <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
               Performance clips will appear here once they are added from the dashboard.
@@ -85,7 +85,7 @@ export function VideoReel() {
                     />
                   ) : (
                     <div className="grid h-full w-full place-items-center bg-surface-3">
-                      <Play className="h-8 w-8 text-gold/50" aria-hidden="true" />
+                      <Play className="h-8 w-8 text-crimson/50" aria-hidden="true" />
                     </div>
                   )}
                   <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />

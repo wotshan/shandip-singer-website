@@ -28,15 +28,15 @@ export function AwardsSection() {
         <ol className="mt-12 space-y-4">
           {awards.map((a, i) => (
             <Reveal key={a.id} variant="left" delay={((i % 3) + 1) as 1 | 2 | 3}>
-              <li className="group flex items-start gap-5 rounded-2xl border border-border-subtle bg-surface-2 p-6 transition-colors hover:border-gold/40">
-                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-gold/40 bg-gold/10 text-gold">
+              <li className="group flex items-start gap-5 rounded-2xl border border-border-subtle bg-surface-2 p-6 transition-colors hover:border-crimson/40">
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-crimson/40 bg-crimson/10 text-crimson">
                   <Award className="h-5 w-5" aria-hidden="true" />
                 </span>
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                     <h3 className="font-display text-2xl text-foreground">{a.title}</h3>
                     {a.year ? (
-                      <span className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">
+                      <span className="text-xs font-semibold uppercase tracking-[0.18em] text-crimson">
                         {a.year}
                       </span>
                     ) : null}

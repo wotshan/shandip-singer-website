@@ -27,7 +27,7 @@ export function PressSection() {
         <div className="mt-12 grid gap-5 md:grid-cols-2">
           {press.map((p, i) => (
             <Reveal key={p.id} variant="scale" delay={((i % 2) + 1) as 1 | 2}>
-              <article className="group flex h-full flex-col rounded-3xl border border-border-subtle bg-surface-2 p-7 transition-colors hover:border-gold/40">
+              <article className="group flex h-full flex-col rounded-3xl border border-border-subtle bg-surface-2 p-7 transition-colors hover:border-crimson/40">
                 <div className="flex items-start justify-between gap-4">
                   <p className="font-display text-xl tracking-[0.08em] text-foreground">{p.outlet}</p>
                   {p.date ? (
@@ -41,7 +41,7 @@ export function PressSection() {
 
                 {p.quote ? (
                   <blockquote className="mt-4 flex gap-3 text-sm leading-relaxed text-muted-foreground">
-                    <Quote className="mt-0.5 h-4 w-4 shrink-0 text-gold" aria-hidden="true" />
+                    <Quote className="mt-0.5 h-4 w-4 shrink-0 text-crimson" aria-hidden="true" />
                     <span className="italic">{p.quote}</span>
                   </blockquote>
                 ) : null}
@@ -51,7 +51,7 @@ export function PressSection() {
                     href={p.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-auto inline-flex items-center gap-2 pt-6 text-sm font-medium text-foreground transition-colors hover:text-gold"
+                    className="mt-auto inline-flex items-center gap-2 pt-6 text-sm font-medium text-foreground transition-colors hover:text-crimson"
                   >
                     Read the feature
                     <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
