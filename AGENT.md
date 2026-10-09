@@ -168,7 +168,7 @@ outside `atomic`.
   browser tab, so a link built from it 404s for whoever receives it; `publicUrl`
   returns a shareable link there and the app's real public URL once published.
   Links the app only follows itself (router navigation, fetches) need nothing here.
-- **internal (do NOT call directly):** `context.ts` / `env.ts` / `serve.ts` /
+- **internal (do NOT call directly):** `context.ts` / `serve.ts` /
   `index.ts` — wiring; use the primitives above, not these.
 
 ## Recipe: file uploads (3 steps — step 3 is the one people forget)
@@ -257,3 +257,18 @@ Keep tests business-seam-focused — never test `_core`.
 ## Commands
 `pnpm dev` (Vite SPA :3000 + API :3001) · `pnpm build` · `pnpm test` ·
 `pnpm typecheck` · `pnpm db:generate` / `pnpm db:migrate`.
+
+## Environment variables (config / secret)
+- **env** (`server/_core/env.ts`): `env.config(name, fallback?)` and
+  `env.secret(name)` read the app owner's own configuration and API keys, set in
+  the platform UI under Settings → Environment variables (dev and prod hold
+  SEPARATE values). Everything else on `env` is platform-owned — read
+  `env.databaseUrl` / `env.jwtSecret` / `env.storage` directly, never through
+  these two. Call them WHERE YOU USE THEM, not at module top level: a top-level
+  call makes one unset variable take down every page, including the ones that
+  don't need it.
+- Need a new config value or API key? Write `env.secret("FOO")` in the code, then
+  **tell the user to add `FOO` under Settings → Environment variables** in your
+  reply. You can never see these values. Do NOT invent one, do NOT hard-code one,
+  and do NOT write `/workspace/app/.env` — that file is rebuilt from the database
+  every time the preview starts, so anything you put there is gone a second later.

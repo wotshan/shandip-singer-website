@@ -8,6 +8,34 @@ function required(name: string): string {
 
 const isProd = process.env.NODE_ENV === "production";
 
+// Variables the platform itself injects. User config must not claim these
+// names, and must not be read through the two accessors below either —
+// platform values have their own typed fields (env.databaseUrl / env.jwtSecret
+// / …). This list must match core/webapp_builder/scaffold.py's
+// RESERVED_ENV_KEYS on the backend exactly — tests/test_webapp_builder_docs.py
+// asserts the two are identical.
+const RESERVED_ENV_KEYS = new Set([
+  "DATABASE_URL", "DB_DRIVER", "DB_POOL_MAX", "JWT_SECRET", "AUTH_PROVIDER",
+  "APP_SLUG", "APP_STORAGE_PRESIGN_URL", "APP_STORAGE_TOKEN",
+  "NODE_ENV", "PORT", "API_PORT",
+]);
+
+// The scope is part of the instruction, not decoration: dev and prod hold
+// SEPARATE values for the same key, so "add it in Settings" without saying
+// WHICH column sends a user to fill the one they already filled. `isProd` is
+// exactly the distinction the settings panel draws (spec §7.1).
+const SETTINGS_HINT =
+  `Add it in Settings → Environment variables (${isProd ? "prod" : "dev"})`;
+
+function userVar(name: string): string | undefined {
+  if (RESERVED_ENV_KEYS.has(name)) {
+    throw new Error(
+      `${name} is a platform variable — read it from env.* instead of env.config/env.secret`,
+    );
+  }
+  return process.env[name];
+}
+
 export const env = {
   isProd,
   databaseUrl: required("DATABASE_URL"),
@@ -35,5 +63,38 @@ export const env = {
   storage: {
     presignUrl: process.env.APP_STORAGE_PRESIGN_URL ?? "",
     token: process.env.APP_STORAGE_TOKEN ?? "",
+  },
+
+  /**
+   * A user-supplied, PLAINTEXT configuration value set in the settings panel.
+   * Pass `fallback` when a sensible default exists.
+   *
+   * Call this where you use the value, not at module top level — a top-level
+   * call would let one unset variable take down the whole app, including
+   * every page that does not need it.
+   */
+  config(name: string, fallback?: string): string {
+    const v = userVar(name);
+    if (v === undefined || v === "") {
+      if (fallback !== undefined) return fallback;
+      throw new Error(`Missing configuration: ${name}. ${SETTINGS_HINT}.`);
+    }
+    return v;
+  },
+
+  /**
+   * A user-supplied SECRET set in the settings panel.
+   *
+   * Deliberately no `fallback` parameter: a secret with a default is
+   * self-contradictory — falling back to a fake key would only turn "no key
+   * configured" into "the third party returned 401", moving the failure as
+   * far from its cause as possible.
+   */
+  secret(name: string): string {
+    const v = userVar(name);
+    if (!v) {
+      throw new Error(`Missing secret: ${name}. ${SETTINGS_HINT}.`);
+    }
+    return v;
   },
 };
