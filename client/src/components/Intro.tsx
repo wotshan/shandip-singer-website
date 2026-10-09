@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
  */
 
 /** Total time the overlay is on screen, in ms. Keep in sync with the CSS. */
-const DURATION = 2600;
+const DURATION = 3600;
 
 export function Intro() {
   const [done, setDone] = useState(false);
@@ -31,7 +31,7 @@ export function Intro() {
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
     const total = reduce ? 500 : DURATION;
-    const leaveAt = Math.max(0, total - 700);
+    const leaveAt = Math.max(0, total - 900);
 
     const leaveTimer = window.setTimeout(() => setLeaving(true), leaveAt);
     const doneTimer = window.setTimeout(() => {
@@ -59,7 +59,7 @@ export function Intro() {
       {/* Ambient crimson glow behind the mark */}
       <div className="ambience absolute inset-0 opacity-70" />
 
-      <div className="relative flex flex-col items-center px-6">
+      <div className="intro-content relative flex flex-col items-center px-6">
         <div className="intro-mark relative">
           <span className="intro-halo absolute inset-0 rounded-full" />
           <img
