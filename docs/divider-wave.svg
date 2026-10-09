@@ -1,0 +1,18 @@
+<svg width="1200" height="80" viewBox="0 0 1200 80" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animated divider">
+  <defs>
+    <linearGradient id="wave" x1="0" y1="40" x2="1200" y2="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2a0a10" stop-opacity="0"/>
+      <stop offset="0.2" stop-color="#7f1324" stop-opacity="0.9"/>
+      <stop offset="0.5" stop-color="#ffffff" stop-opacity="0.55"/>
+      <stop offset="0.8" stop-color="#7f1324" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#2a0a10" stop-opacity="0"/>
+    </linearGradient>
+    <style>@media (prefers-reduced-motion: reduce){animate{display:none;}}</style>
+  </defs>
+  <path d="M0 40C120 20 180 20 300 40C420 60 480 60 600 40C720 20 780 20 900 40C1020 60 1080 60 1200 40" stroke="url(#wave)" stroke-width="2" stroke-linecap="round">
+    <animate attributeName="d" dur="8s" repeatCount="indefinite"
+      values="M0 40C120 20 180 20 300 40C420 60 480 60 600 40C720 20 780 20 900 40C1020 60 1080 60 1200 40;
+              M0 40C120 56 180 56 300 40C420 24 480 24 600 40C720 56 780 56 900 40C1020 24 1080 24 1200 40;
+              M0 40C120 20 180 20 300 40C420 60 480 60 600 40C720 20 780 20 900 40C1020 60 1080 60 1200 40"/>
+  </path>
+</svg>

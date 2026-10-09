@@ -1,0 +1,7 @@
+<svg width="900" height="72" viewBox="0 0 900 72" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animated typing tagline">
+  <rect width="900" height="72" rx="18" fill="#090909"/>
+  <rect x="0.5" y="0.5" width="899" height="71" rx="17.5" stroke="rgba(255,255,255,0.08)"/>
+  <text x="28" y="45" fill="#f5f5f5" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="500">Dark editorial UI • real gallery • accessible motion<tspan fill="#cc1e36">|</tspan>
+    <animate attributeName="opacity" values="1;1;1;1;0;0;1" dur="1.2s" repeatCount="indefinite"/>
+  </text>
+</svg>
