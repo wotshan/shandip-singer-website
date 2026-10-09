@@ -19,6 +19,13 @@ export const resourceTables = {
   occasions: schema.occasions,
   testimonials: schema.testimonials,
   availability: schema.availabilityDays,
+  awards: schema.awards,
+  press: schema.pressItems,
+  collaborations: schema.collaborations,
+  stats: schema.stats,
+  highlights: schema.highlights,
+  fanMessages: schema.fanMessages,
+  pressMentions: schema.pressMentions,
 } as const;
 
 export type ResourceName = keyof typeof resourceTables;
@@ -133,20 +140,63 @@ export async function deleteEnquiry(id: string) {
   return removed.length > 0;
 }
 
+// ── Newsletter subscribers ───────────────────────────────────────────────────
+// Public create (anyone can join the fan list), admin-only read/delete. The
+// email column is UNIQUE, so a repeat signup is a no-op rather than a duplicate.
+export async function createSubscriber(values: { email: string; name?: string }) {
+  const rows = (await db
+    .insert(schema.subscribers)
+    .values({ email: values.email.trim().toLowerCase(), name: values.name?.trim() ?? "" })
+    .onConflictDoNothing({ target: schema.subscribers.email })
+    .returning()) as any[];
+  return rows[0] ?? null;
+}
+
+export async function listSubscribers() {
+  return db.select().from(schema.subscribers).orderBy(desc(schema.subscribers.createdAt));
+}
+
+export async function deleteSubscriber(id: string) {
+  const removed = (await db.delete(schema.subscribers).where(eq(schema.subscribers.id, id)).returning()) as any[];
+  return removed.length > 0;
+}
+
 // ── Public content bundle ────────────────────────────────────────────────────
 /** Everything the public site renders, in one round-trip. */
 export async function getSiteContent(): Promise<SiteContent> {
-  const [settings, socials, gallery, events, music, occasions, testimonials, availability] =
-    await Promise.all([
-      getSettings(),
-      listResource("socials"),
-      listResource("gallery"),
-      listResource("events"),
-      listResource("music"),
-      listResource("occasions"),
-      listResource("testimonials"),
-      listResource("availability"),
-    ]);
+  const [
+    settings,
+    socials,
+    gallery,
+    events,
+    music,
+    occasions,
+    testimonials,
+    availability,
+    awards,
+    press,
+    collaborations,
+    stats,
+    highlights,
+    fanMessages,
+    pressMentions,
+  ] = await Promise.all([
+    getSettings(),
+    listResource("socials"),
+    listResource("gallery"),
+    listResource("events"),
+    listResource("music"),
+    listResource("occasions"),
+    listResource("testimonials"),
+    listResource("availability"),
+    listResource("awards"),
+    listResource("press"),
+    listResource("collaborations"),
+    listResource("stats"),
+    listResource("highlights"),
+    listResource("fanMessages"),
+    listResource("pressMentions"),
+  ]);
 
   return {
     settings: {
@@ -170,5 +220,12 @@ export async function getSiteContent(): Promise<SiteContent> {
     occasions,
     testimonials,
     availability,
+    awards,
+    press,
+    collaborations,
+    stats,
+    highlights,
+    fanMessages,
+    pressMentions,
   };
 }

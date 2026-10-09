@@ -1,37 +1,54 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import {
+  Award,
   CalendarDays,
   ExternalLink,
+  Handshake,
   Image as ImageIcon,
   Inbox,
   Link2,
   ListMusic,
   LogOut,
+  Mail,
+  Megaphone,
+  Newspaper,
   PartyPopper,
   Quote,
   Settings,
   Sparkles,
+  Star,
+  TrendingUp,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/_core/useAuth";
 import { SettingsEditor } from "@/components/admin/SettingsEditor";
 import { ResourceManager } from "@/components/admin/ResourceManager";
 import { EnquiriesInbox } from "@/components/admin/EnquiriesInbox";
+import { SubscribersInbox } from "@/components/admin/SubscribersInbox";
 import type { ContentResource } from "@shared/types";
 
-type SectionKey = "profile" | ContentResource | "enquiries";
+type SectionKey = "profile" | ContentResource | "enquiries" | "subscribers";
 
 const SECTIONS: { key: SectionKey; label: string; icon: typeof Settings }[] = [
   { key: "profile", label: "Artist profile", icon: Settings },
   { key: "gallery", label: "Gallery", icon: ImageIcon },
+  { key: "highlights", label: "Featured highlights", icon: Star },
   { key: "socials", label: "Social links", icon: Link2 },
-  { key: "events", label: "Events", icon: CalendarDays },
+  { key: "events", label: "Events & tour", icon: CalendarDays },
   { key: "music", label: "Music", icon: ListMusic },
   { key: "occasions", label: "Occasions", icon: PartyPopper },
+  { key: "awards", label: "Awards & achievements", icon: Award },
+  { key: "press", label: "Press & media", icon: Newspaper },
+  { key: "collaborations", label: "Brand collaborations", icon: Handshake },
+  { key: "stats", label: "Stats & highlights", icon: TrendingUp },
+  { key: "pressMentions", label: "As seen on", icon: Megaphone },
   { key: "testimonials", label: "Testimonials", icon: Quote },
+  { key: "fanMessages", label: "Fan zone", icon: Users },
   { key: "availability", label: "Availability", icon: Sparkles },
   { key: "enquiries", label: "Enquiries", icon: Inbox },
+  { key: "subscribers", label: "Fan club", icon: Mail },
 ];
 
 export default function AdminDashboard() {
@@ -113,7 +130,8 @@ export default function AdminDashboard() {
         <div className="min-w-0">
           {section === "profile" ? <SettingsEditor /> : null}
           {section === "enquiries" ? <EnquiriesInbox /> : null}
-          {section !== "profile" && section !== "enquiries" ? (
+          {section === "subscribers" ? <SubscribersInbox /> : null}
+          {section !== "profile" && section !== "enquiries" && section !== "subscribers" ? (
             <ResourceManager resource={section} />
           ) : null}
         </div>

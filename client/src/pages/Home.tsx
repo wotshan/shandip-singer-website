@@ -5,7 +5,6 @@ import { Hero } from "@/components/Hero";
 import { Marquee } from "@/components/Marquee";
 import { Reveal } from "@/components/Reveal";
 import { SectionHeading } from "@/components/SectionHeading";
-import { EventCard } from "@/components/EventCard";
 import { MusicCard } from "@/components/MusicCard";
 import { GalleryGrid } from "@/components/GalleryGrid";
 import { OccasionCard } from "@/components/OccasionCard";
@@ -14,6 +13,14 @@ import { EnquiryForm } from "@/components/EnquiryForm";
 import { Testimonials } from "@/components/Testimonials";
 import { ContactLinks } from "@/components/ContactLinks";
 import { SocialCarousel } from "@/components/SocialCarousel";
+import { StatsCounter } from "@/components/StatsCounter";
+import { TourSection } from "@/components/TourSection";
+import { HighlightsGrid } from "@/components/HighlightsGrid";
+import { AwardsSection } from "@/components/AwardsSection";
+import { PressSection } from "@/components/PressSection";
+import { CollaborationsSection } from "@/components/CollaborationsSection";
+import { FanZone } from "@/components/FanZone";
+import { NewsletterSignup } from "@/components/NewsletterSignup";
 import { useSiteContent } from "@/content/SiteContentProvider";
 
 /** Shared section shell so vertical rhythm is identical everywhere. */
@@ -33,23 +40,14 @@ function Section({
   );
 }
 
-/** Designed empty state for a collection with no rows yet. */
-function EmptyState({ title, body }: { title: string; body: string }) {
-  return (
-    <div className="rounded-3xl border border-dashed border-border-strong bg-surface-2 p-10 text-center">
-      <p className="font-display text-2xl text-foreground">{title}</p>
-      <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">{body}</p>
-    </div>
-  );
-}
-
 export default function Home() {
-  const { settings, events, music, gallery, occasions } = useSiteContent();
+  const { settings, music, gallery, occasions } = useSiteContent();
 
   return (
     <>
       <Hero />
       <Marquee />
+      <StatsCounter />
 
       {/* ── About ─────────────────────────────────────────────────────────── */}
       <Section id="about">
@@ -87,43 +85,11 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ── Events ────────────────────────────────────────────────────────── */}
-      <Section id="events" className="border-t border-border-subtle">
-        <Reveal>
-          <SectionHeading
-            eyebrow="Upcoming"
-            title="Where I'm performing next"
-            intro="A look at the calendar ahead. Reach out early for dates that are still open."
-          />
-        </Reveal>
+      {/* ── Tour / upcoming shows ─────────────────────────────────────────── */}
+      <TourSection />
 
-        <div className="mt-10">
-          {events.length === 0 ? (
-            <EmptyState
-              title="No dates announced yet"
-              body="Confirmed performances will be listed here as soon as they are locked in. In the meantime, send an enquiry for your own date."
-            />
-          ) : (
-            <div className="grid gap-4 lg:grid-cols-2">
-              {events.slice(0, 4).map((event, i) => (
-                <Reveal key={event.id} variant="scale" delay={((i % 2) + 1) as 1 | 2}>
-                  <EventCard event={event} />
-                </Reveal>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <Reveal className="mt-8">
-          <Link
-            href="/events"
-            className="group inline-flex items-center gap-2 text-sm font-medium text-foreground transition-colors hover:text-crimson"
-          >
-            View the full calendar
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
-          </Link>
-        </Reveal>
-      </Section>
+      {/* ── Featured highlights ───────────────────────────────────────────── */}
+      <HighlightsGrid />
 
       {/* ── Music ─────────────────────────────────────────────────────────── */}
       <Section id="music" className="border-t border-border-subtle">
@@ -179,6 +145,11 @@ export default function Home() {
         </Reveal>
       </Section>
 
+      {/* ── Awards, press & collaborations ────────────────────────────────── */}
+      <AwardsSection />
+      <PressSection />
+      <CollaborationsSection />
+
       {/* ── Occasions ─────────────────────────────────────────────────────── */}
       <Section id="occasions" className="border-t border-border-subtle">
         <Reveal>
@@ -215,6 +186,9 @@ export default function Home() {
         </div>
       </Section>
 
+      {/* ── Fan zone ──────────────────────────────────────────────────────── */}
+      <FanZone />
+
       {/* ── Enquiry ───────────────────────────────────────────────────────── */}
       <Section id="enquiry" className="border-t border-border-subtle">
         <div className="grid gap-12 lg:grid-cols-[1fr_1.3fr] lg:gap-16">
@@ -240,6 +214,9 @@ export default function Home() {
       <div className="border-t border-border-subtle">
         <Testimonials />
       </div>
+
+      {/* ── Fan club / newsletter ─────────────────────────────────────────── */}
+      <NewsletterSignup />
 
       {/* ── Contact CTA ───────────────────────────────────────────────────── */}
       <Section id="contact" className="border-t border-border-subtle">

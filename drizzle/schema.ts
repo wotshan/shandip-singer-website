@@ -135,6 +135,8 @@ export const events = pgTable(
     city: text("city").notNull().default(""),
     status: text("status").notNull().default("Confirmed"), // Confirmed | On Hold
     note: text("note"),
+    ticketHref: text("ticket_href"),     // optional real ticket link
+    ticketLabel: text("ticket_label"),   // optional CTA label, e.g. "Get tickets"
     sortOrder: integer("sort_order").notNull().default(0),
   },
   (t) => [index("events_order_idx").on(t.sortOrder)],
@@ -211,4 +213,116 @@ export const enquiries = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("enquiries_created_idx").on(t.createdAt)],
+);
+
+// ── Celebrity-brand collections ──────────────────────────────────────────────
+// Added for the star-level presentation. Same single-tenant rules as above:
+// public read, admin-only write, `sortOrder` controls display order. Every one
+// of these starts EMPTY and is filled by the admin — nothing here is invented.
+
+/** Awards & recognitions. Only genuine, verifiable awards belong here. */
+export const awards = pgTable(
+  "awards",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    title: text("title").notNull(),
+    organisation: text("organisation").notNull().default(""),
+    year: text("year").notNull().default(""),
+    description: text("description").notNull().default(""),
+    sortOrder: integer("sort_order").notNull().default(0),
+  },
+  (t) => [index("awards_order_idx").on(t.sortOrder)],
+);
+
+/** Press / media coverage. Only real, published features belong here. */
+export const pressItems = pgTable(
+  "press_items",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    outlet: text("outlet").notNull(),
+    headline: text("headline").notNull().default(""),
+    quote: text("quote").notNull().default(""),
+    date: text("date").notNull().default(""),
+    href: text("href"),                  // optional real article link
+    sortOrder: integer("sort_order").notNull().default(0),
+  },
+  (t) => [index("press_items_order_idx").on(t.sortOrder)],
+);
+
+/** Brand collaborations / endorsements. Only real partnerships belong here. */
+export const collaborations = pgTable(
+  "collaborations",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    brand: text("brand").notNull(),
+    role: text("role").notNull().default(""),
+    description: text("description").notNull().default(""),
+    year: text("year").notNull().default(""),
+    href: text("href"),                  // optional real link
+    sortOrder: integer("sort_order").notNull().default(0),
+  },
+  (t) => [index("collaborations_order_idx").on(t.sortOrder)],
+);
+
+/** Animated highlight counters (shows, fans, streams, years). */
+export const stats = pgTable(
+  "stats",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    label: text("label").notNull(),
+    value: integer("value").notNull().default(0),
+    suffix: text("suffix").notNull().default(""),   // e.g. "+", "K"
+    sortOrder: integer("sort_order").notNull().default(0),
+  },
+  (t) => [index("stats_order_idx").on(t.sortOrder)],
+);
+
+/** Cinematic gallery highlights — a curated subset of the gallery. */
+export const highlights = pgTable(
+  "highlights",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    src: text("src").notNull(),
+    caption: text("caption").notNull().default(""),
+    alt: text("alt").notNull().default(""),
+    sortOrder: integer("sort_order").notNull().default(0),
+  },
+  (t) => [index("highlights_order_idx").on(t.sortOrder)],
+);
+
+/** Fan-zone messages. Only genuine, permitted messages belong here. */
+export const fanMessages = pgTable(
+  "fan_messages",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    message: text("message").notNull(),
+    author: text("author").notNull().default(""),
+    city: text("city").notNull().default(""),
+    sortOrder: integer("sort_order").notNull().default(0),
+  },
+  (t) => [index("fan_messages_order_idx").on(t.sortOrder)],
+);
+
+/** Newsletter / fan-club signups captured from the public site. */
+export const subscribers = pgTable(
+  "subscribers",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    email: text("email").notNull().unique(),
+    name: text("name").notNull().default(""),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("subscribers_created_idx").on(t.createdAt)],
+);
+
+/** "As seen on" / press-mention strip. Tasteful, admin-editable placeholders. */
+export const pressMentions = pgTable(
+  "press_mentions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    label: text("label").notNull(),
+    href: text("href"),                  // optional real link
+    sortOrder: integer("sort_order").notNull().default(0),
+  },
+  (t) => [index("press_mentions_order_idx").on(t.sortOrder)],
 );

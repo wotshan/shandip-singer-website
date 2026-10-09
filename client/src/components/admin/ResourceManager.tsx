@@ -28,7 +28,15 @@ function fromInputValue(field: FieldDef, value: string | boolean | number): unkn
   }
   const s = String(value);
   // Optional text fields are stored as null so the API's nullable schema accepts them.
-  if (s === "" && (field.name === "href" || field.name === "linkLabel" || field.name === "duration" || field.name === "note")) {
+  if (
+    s === "" &&
+    (field.name === "href" ||
+      field.name === "linkLabel" ||
+      field.name === "duration" ||
+      field.name === "note" ||
+      field.name === "ticketHref" ||
+      field.name === "ticketLabel")
+  ) {
     return null;
   }
   return s;

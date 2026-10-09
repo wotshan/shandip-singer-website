@@ -65,6 +65,8 @@ export type EventItem = {
   city: string;
   status: string;
   note: string | null;
+  ticketHref: string | null;
+  ticketLabel: string | null;
   sortOrder: number;
 };
 
@@ -118,6 +120,75 @@ export type Enquiry = {
   createdAt: string;
 };
 
+// ── Celebrity-brand collections ──────────────────────────────────────────────
+
+export type AwardItem = {
+  id: string;
+  title: string;
+  organisation: string;
+  year: string;
+  description: string;
+  sortOrder: number;
+};
+
+export type PressItem = {
+  id: string;
+  outlet: string;
+  headline: string;
+  quote: string;
+  date: string;
+  href: string | null;
+  sortOrder: number;
+};
+
+export type CollaborationItem = {
+  id: string;
+  brand: string;
+  role: string;
+  description: string;
+  year: string;
+  href: string | null;
+  sortOrder: number;
+};
+
+export type StatItem = {
+  id: string;
+  label: string;
+  value: number;
+  suffix: string;
+  sortOrder: number;
+};
+
+export type HighlightItem = {
+  id: string;
+  src: string;
+  caption: string;
+  alt: string;
+  sortOrder: number;
+};
+
+export type FanMessageItem = {
+  id: string;
+  message: string;
+  author: string;
+  city: string;
+  sortOrder: number;
+};
+
+export type PressMentionItem = {
+  id: string;
+  label: string;
+  href: string | null;
+  sortOrder: number;
+};
+
+export type Subscriber = {
+  id: string;
+  email: string;
+  name: string;
+  createdAt: string;
+};
+
 export type SiteContent = {
   settings: SiteSettings;
   socials: SocialLink[];
@@ -127,6 +198,13 @@ export type SiteContent = {
   occasions: OccasionItem[];
   testimonials: TestimonialItem[];
   availability: AvailabilityDay[];
+  awards: AwardItem[];
+  press: PressItem[];
+  collaborations: CollaborationItem[];
+  stats: StatItem[];
+  highlights: HighlightItem[];
+  fanMessages: FanMessageItem[];
+  pressMentions: PressMentionItem[];
 };
 
 /** The editable collections the admin dashboard manages. */
@@ -138,6 +216,13 @@ export const CONTENT_RESOURCES = [
   "occasions",
   "testimonials",
   "availability",
+  "awards",
+  "press",
+  "collaborations",
+  "stats",
+  "highlights",
+  "fanMessages",
+  "pressMentions",
 ] as const;
 
 export type ContentResource = (typeof CONTENT_RESOURCES)[number];

@@ -1,11 +1,16 @@
 import { Link } from "wouter";
-import { ArrowRight, Play } from "lucide-react";
+import { ArrowRight, Play, Ticket } from "lucide-react";
 import { useSiteContent } from "@/content/SiteContentProvider";
+import { PressMentionsStrip } from "./PressMentionsStrip";
 
 /**
- * Cinematic hero. The headline is the artist name set large in the display
- * face; the visual is a real photograph behind a heavy dark overlay so the type
- * always sits on a readable surface.
+ * Cinematic hero.
+ *
+ * The headline is the artist name set large in the display face; the visual is a
+ * real photograph behind a heavy dark overlay so the type always sits on a
+ * readable surface. A slow spotlight sweep and a gentle push-in give it a
+ * star-level, stage-lit feel — both are transform/opacity only, so they
+ * composite on the GPU and cost nothing on a phone.
  */
 export function Hero() {
   const { settings } = useSiteContent();
@@ -30,13 +35,15 @@ export function Hero() {
         className="absolute inset-0 -z-10 bg-gradient-to-t from-background via-background/85 to-background/45"
       />
       <div aria-hidden="true" className="ambience absolute inset-0 -z-10 opacity-80" />
+      {/* Slow spotlight sweep — a soft cone of light drifting across the stage */}
+      <div aria-hidden="true" className="hero-spotlight absolute inset-0 -z-10" />
 
       <div className="mx-auto w-full max-w-7xl px-5 pb-16 pt-32 sm:px-8 sm:pb-24">
         <p
           className="eyebrow mb-6 flex items-center gap-3 opacity-0"
           style={{ animation: "fade-up 0.9s cubic-bezier(0.22,1,0.36,1) 0.1s forwards" }}
         >
-          <span className="h-px w-10 bg-crimson" aria-hidden="true" />
+          <span className="h-px w-10 bg-gold" aria-hidden="true" />
           {settings.role}
         </p>
 
@@ -59,17 +66,18 @@ export function Hero() {
           style={{ animation: "fade-up 1s cubic-bezier(0.22,1,0.36,1) 0.58s forwards" }}
         >
           <Link
+            href="/contact"
+            className="group inline-flex items-center justify-center gap-2.5 rounded-full bg-foreground px-7 py-3.5 text-[0.8125rem] font-semibold uppercase tracking-[0.14em] text-background transition-all duration-300 hover:bg-gold hover:text-black"
+          >
+            <Ticket className="h-4 w-4" aria-hidden="true" />
+            Book for your event
+          </Link>
+          <Link
             href="/music"
-            className="group inline-flex items-center justify-center gap-2.5 rounded-full bg-foreground px-7 py-3.5 text-[0.8125rem] font-semibold uppercase tracking-[0.14em] text-background transition-all duration-300 hover:bg-crimson hover:text-white"
+            className="group inline-flex items-center justify-center gap-2.5 rounded-full border border-border-strong bg-white/[0.03] px-7 py-3.5 text-[0.8125rem] font-semibold uppercase tracking-[0.14em] text-foreground backdrop-blur-sm transition-all duration-300 hover:border-gold/60 hover:bg-gold/10"
           >
             <Play className="h-4 w-4" aria-hidden="true" />
             Explore my music
-          </Link>
-          <Link
-            href="/contact"
-            className="group inline-flex items-center justify-center gap-2.5 rounded-full border border-border-strong bg-white/[0.03] px-7 py-3.5 text-[0.8125rem] font-semibold uppercase tracking-[0.14em] text-foreground backdrop-blur-sm transition-all duration-300 hover:border-crimson/60 hover:bg-crimson/10"
-          >
-            Book for your event
             <ArrowRight
               className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
               aria-hidden="true"
@@ -80,6 +88,13 @@ export function Hero() {
         <p className="mt-10 text-xs uppercase tracking-[0.2em] text-ink-faint">
           {settings.cities}
         </p>
+
+        <div
+          className="opacity-0"
+          style={{ animation: "fade-up 1s cubic-bezier(0.22,1,0.36,1) 0.75s forwards" }}
+        >
+          <PressMentionsStrip />
+        </div>
       </div>
     </section>
   );

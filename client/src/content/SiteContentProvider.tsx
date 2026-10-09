@@ -8,6 +8,15 @@ import { fallbackMusic } from "@/data/music";
 import { fallbackOccasions } from "@/data/occasions";
 import { fallbackTestimonials } from "@/data/testimonials";
 import { fallbackAvailability } from "@/data/availability";
+import {
+  fallbackAwards,
+  fallbackCollaborations,
+  fallbackFanMessages,
+  fallbackHighlights,
+  fallbackPress,
+  fallbackPressMentions,
+  fallbackStats,
+} from "@/data/celebrity";
 
 /**
  * Site content seam.
@@ -26,6 +35,13 @@ const FALLBACK: SiteContent = {
   occasions: fallbackOccasions,
   testimonials: fallbackTestimonials,
   availability: fallbackAvailability,
+  awards: fallbackAwards,
+  press: fallbackPress,
+  collaborations: fallbackCollaborations,
+  stats: fallbackStats,
+  highlights: fallbackHighlights,
+  fanMessages: fallbackFanMessages,
+  pressMentions: fallbackPressMentions,
 };
 
 type SiteContentValue = SiteContent & {
@@ -54,6 +70,13 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
       occasions: data?.occasions?.length ? data.occasions : FALLBACK.occasions,
       testimonials: data?.testimonials ?? FALLBACK.testimonials,
       availability: data?.availability ?? FALLBACK.availability,
+      awards: data?.awards ?? FALLBACK.awards,
+      press: data?.press ?? FALLBACK.press,
+      collaborations: data?.collaborations ?? FALLBACK.collaborations,
+      stats: data?.stats?.length ? data.stats : FALLBACK.stats,
+      highlights: data?.highlights?.length ? data.highlights : FALLBACK.highlights,
+      fanMessages: data?.fanMessages ?? FALLBACK.fanMessages,
+      pressMentions: data?.pressMentions?.length ? data.pressMentions : FALLBACK.pressMentions,
       isLoading: query.isLoading,
       isFallback: query.isError,
       refetch: () => void query.refetch(),

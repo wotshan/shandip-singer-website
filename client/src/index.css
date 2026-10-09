@@ -48,6 +48,8 @@
   --crimson: hsl(352 74% 46%);
   --crimson-soft: hsl(352 60% 34%);
   --ember: hsl(18 80% 52%);
+  --gold: hsl(42 62% 58%);
+  --gold-soft: hsl(42 50% 42%);
   --glass: hsla(0 0% 100% / 0.035);
   --glass-border: hsla(0 0% 100% / 0.08);
   --font-display: "Cormorant Garamond", Georgia, "Times New Roman", serif;
@@ -104,6 +106,8 @@
   --color-crimson: var(--crimson);
   --color-crimson-soft: var(--crimson-soft);
   --color-ember: var(--ember);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
 
   --font-display: var(--font-display);
   --font-sans: var(--font-sans);
@@ -344,6 +348,26 @@
   animation: hero-zoom 16s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/*
+  Hero spotlight — a soft cone of warm light that drifts slowly across the
+  stage. Transform/opacity only, so it composites on the GPU. It is purely
+  decorative and sits behind the type.
+*/
+@keyframes hero-spotlight-sweep {
+  0%   { opacity: 0.5; transform: translate3d(-8%, 0, 0) rotate(-6deg); }
+  50%  { opacity: 0.85; transform: translate3d(8%, 0, 0) rotate(6deg); }
+  100% { opacity: 0.5; transform: translate3d(-8%, 0, 0) rotate(-6deg); }
+}
+.hero-spotlight {
+  background: radial-gradient(
+    42% 60% at 50% 0%,
+    hsla(42 62% 58% / 0.16),
+    transparent 70%
+  );
+  animation: hero-spotlight-sweep 18s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
 /* ── Social carousel ────────────────────────────────────────────────────────
    Same seamless technique as the text marquee: the row is duplicated once and
    the track slides exactly -50%, so the loop restarts where the first copy
@@ -360,6 +384,10 @@
 @media (prefers-reduced-motion: reduce) {
   .hero-zoom {
     animation: none !important;
+  }
+  .hero-spotlight {
+    animation: none !important;
+    opacity: 0.6;
   }
   /* Static, readable fallback: drop the duplicate copy and let the real row
      wrap and centre instead of sliding. */

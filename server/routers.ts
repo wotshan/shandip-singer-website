@@ -99,6 +99,8 @@ const resourceSchemas = {
     city: z.string().default(""),
     status: z.enum(["Confirmed", "On Hold"]).default("Confirmed"),
     note: z.string().nullable().default(null),
+    ticketHref: z.string().nullable().default(null),
+    ticketLabel: z.string().nullable().default(null),
     sortOrder: z.number().int().default(0),
   }),
   music: z.object({
@@ -126,6 +128,52 @@ const resourceSchemas = {
     date: z.string().min(1),
     status: z.enum(["AVAILABLE", "TENTATIVE", "BOOKED", "UNAVAILABLE"]).default("AVAILABLE"),
     note: z.string().nullable().default(null),
+  }),
+  awards: z.object({
+    title: z.string().min(1),
+    organisation: z.string().default(""),
+    year: z.string().default(""),
+    description: z.string().default(""),
+    sortOrder: z.number().int().default(0),
+  }),
+  press: z.object({
+    outlet: z.string().min(1),
+    headline: z.string().default(""),
+    quote: z.string().default(""),
+    date: z.string().default(""),
+    href: z.string().nullable().default(null),
+    sortOrder: z.number().int().default(0),
+  }),
+  collaborations: z.object({
+    brand: z.string().min(1),
+    role: z.string().default(""),
+    description: z.string().default(""),
+    year: z.string().default(""),
+    href: z.string().nullable().default(null),
+    sortOrder: z.number().int().default(0),
+  }),
+  stats: z.object({
+    label: z.string().min(1),
+    value: z.number().int().default(0),
+    suffix: z.string().default(""),
+    sortOrder: z.number().int().default(0),
+  }),
+  highlights: z.object({
+    src: z.string().min(1),
+    caption: z.string().default(""),
+    alt: z.string().default(""),
+    sortOrder: z.number().int().default(0),
+  }),
+  fanMessages: z.object({
+    message: z.string().min(1),
+    author: z.string().default(""),
+    city: z.string().default(""),
+    sortOrder: z.number().int().default(0),
+  }),
+  pressMentions: z.object({
+    label: z.string().min(1),
+    href: z.string().nullable().default(null),
+    sortOrder: z.number().int().default(0),
   }),
 } satisfies Record<ResourceName, z.ZodTypeAny>;
 
@@ -304,12 +352,30 @@ const filesRouter = router({
     }),
 });
 
+// ── Newsletter subscribers (public create, admin manage) ─────────────────────
+const subscribersRouter = router({
+  create: publicProcedure
+    .input(z.object({ email: z.string().email(), name: z.string().optional() }))
+    .mutation(({ input }) => q.createSubscriber({ email: input.email, name: input.name })),
+
+  list: adminProcedure.query(() => q.listSubscribers()),
+
+  remove: adminProcedure
+    .input(z.object({ id: z.string().min(1) }))
+    .mutation(async ({ input }) => {
+      const ok = await q.deleteSubscriber(input.id);
+      if (!ok) throw new TRPCError({ code: "NOT_FOUND", message: "That subscriber no longer exists." });
+      return { ok: true };
+    }),
+});
+
 export const appRouter = router({
   auth: authRouter,
   admin: adminRouter,
   content: contentRouter,
   settings: settingsRouter,
   enquiries: enquiriesRouter,
+  subscribers: subscribersRouter,
   files: filesRouter,
 });
 
