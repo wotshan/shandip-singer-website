@@ -1,5 +1,7 @@
 # SHANDIP — Professional Singer & Live Performer
 
+[![CI](https://github.com/codeswithshan/shandip-singer-website/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/codeswithshan/shandip-singer-website/actions/workflows/ci.yml)
+
 A premium, cinematic website for the artist brand **SHANDIP**. Built as a real,
 responsive React application — not a mockup — with a dark editorial aesthetic,
 large typography and restrained motion.
@@ -80,8 +82,7 @@ says so rather than implying otherwise:
   sample/demo data.
 - The **enquiry form** validates and confirms on screen, but is **not connected
   to a booking inbox** — nothing is sent to the artist yet.
-- **Contact links** (WhatsApp, Instagram, YouTube, email) are editable
-  placeholders until the real accounts are supplied.
+- **Contact links** are real public contact links supplied for SHANDIP.
 - The **gallery** uses the artist's real performance photographs; captions
   describe the setting only and name no specific event, venue or date.
 
