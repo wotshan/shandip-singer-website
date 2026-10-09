@@ -1,0 +1,61 @@
+# Dependabot configuration for shandip-singer-website
+# Docs: https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+#
+# The project is a single-package pnpm repo: package.json and pnpm-lock.yaml
+# both live at the repository root, so the npm ecosystem points at "/".
+# Dependabot's "npm" ecosystem understands pnpm lockfiles natively.
+
+version: 2
+updates:
+  # ---- Application dependencies (pnpm, root package.json) ----
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 5
+    versioning-strategy: increase
+    labels:
+      - "dependencies"
+      - "npm"
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+      include: "scope"
+    groups:
+      # Production dependencies: minor + patch bumps arrive as ONE PR.
+      production-dependencies:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
+      # Dev dependencies: minor + patch bumps arrive as ONE PR.
+      development-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+    # Major bumps are intentionally left ungrouped so each one gets its own
+    # PR and can be reviewed (and reverted) on its own.
+
+  # ---- GitHub Actions used by the CI workflow ----
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "chore(ci)"
+      include: "scope"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
