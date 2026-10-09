@@ -122,7 +122,7 @@ export function Nav() {
         id="mobile-nav"
         className={cn(
           "overflow-hidden border-t border-border-subtle bg-background/95 backdrop-blur-xl transition-[max-height,opacity] duration-400 lg:hidden",
-          open ? "max-h-[32rem] opacity-100" : "max-h-0 opacity-0",
+          open ? "max-h-[44rem] opacity-100" : "max-h-0 opacity-0",
         )}
       >
         <nav aria-label="Mobile" className="flex flex-col px-5 py-4">

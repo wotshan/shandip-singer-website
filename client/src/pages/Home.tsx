@@ -7,6 +7,7 @@ import { Reveal } from "@/components/Reveal";
 import { SectionHeading } from "@/components/SectionHeading";
 import { EventCard } from "@/components/EventCard";
 import { MusicCard } from "@/components/MusicCard";
+import { GalleryGrid } from "@/components/GalleryGrid";
 import { OccasionCard } from "@/components/OccasionCard";
 import { AvailabilityCalendar } from "@/components/AvailabilityCalendar";
 import { EnquiryForm } from "@/components/EnquiryForm";
@@ -16,6 +17,7 @@ import { SampleNotice } from "@/components/SampleNotice";
 import { site } from "@/data/site";
 import { upcomingEvents, eventsAreSample } from "@/data/events";
 import { musicItems, musicLinksArePlaceholders } from "@/data/music";
+import { galleryItems, galleryNote } from "@/data/gallery";
 import { occasions } from "@/data/occasions";
 
 /** Shared section shell so vertical rhythm is identical everywhere. */
@@ -155,7 +157,36 @@ export default function Home() {
         </Reveal>
       </Section>
 
-      {/* ── Occasions ───────────────────────────────────────────────────── */}
+      {/* ── Gallery ────────────────────────────────────────────────────────── */}
+      <Section id="gallery" className="border-t border-border-subtle">
+        <Reveal>
+          <SectionHeading
+            eyebrow="Gallery"
+            title="Moments from the stage"
+            intro="Photographs from live performances — the room, the lights and the songs in between."
+          />
+        </Reveal>
+
+        <Reveal delay={1} className="mt-10">
+          <GalleryGrid items={galleryItems} />
+        </Reveal>
+
+        <Reveal className="mt-6">
+          <p className="text-xs leading-relaxed text-ink-faint">{galleryNote}</p>
+        </Reveal>
+
+        <Reveal className="mt-8">
+          <Link
+            href="/gallery"
+            className="group inline-flex items-center gap-2 text-sm font-medium text-foreground transition-colors hover:text-crimson"
+          >
+            View the full gallery
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+          </Link>
+        </Reveal>
+      </Section>
+
+      {/* ── Occasions ────────────────────────────────────────────────────────── */}
       <Section id="occasions" className="border-t border-border-subtle">
         <Reveal>
           <SectionHeading

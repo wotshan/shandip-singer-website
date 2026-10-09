@@ -5,6 +5,7 @@ import About from "./pages/About";
 import { OccasionsPage } from "./pages/About";
 import Events from "./pages/Events";
 import Music from "./pages/Music";
+import Gallery from "./pages/Gallery";
 import Availability from "./pages/Availability";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
@@ -21,6 +22,7 @@ export default function App() {
         <Route path="/about" component={About} />
         <Route path="/events" component={Events} />
         <Route path="/music" component={Music} />
+        <Route path="/gallery" component={Gallery} />
         <Route path="/occasions" component={OccasionsPage} />
         <Route path="/availability" component={Availability} />
         <Route path="/contact" component={Contact} />

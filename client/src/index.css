@@ -256,6 +256,42 @@
 }
 
 
+/*
+  Gallery tiles: darken the foot of the frame so the white caption always has a
+  readable base, whatever the photograph behind it happens to be doing.
+*/
+.gallery-scrim {
+  background: linear-gradient(
+    to top,
+    hsla(0 0% 0% / 0.78) 0%,
+    hsla(0 0% 0% / 0.28) 34%,
+    transparent 62%
+  );
+}
+
+/* Lightbox: settle between photos instead of snapping. */
+@keyframes lightbox-in {
+  from { opacity: 0; transform: scale(0.985); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes lightbox-backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.lightbox-media { animation: lightbox-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) both; }
+/*
+  `touch-action` is load-bearing. The overlay owns its gestures (swipe to move
+  between photos), and without this the browser claims horizontal drags for its
+  own in-page history navigation — a right swipe inside the viewer navigated
+  away from the gallery instead of showing the previous photo. `none` hands the
+  whole gesture to the handler below, which is correct here because the overlay
+  has nothing to scroll: the photo is contained to fit the viewport.
+*/
+.lightbox-backdrop {
+  animation: lightbox-backdrop-in 0.24s ease-out both;
+  touch-action: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after {
