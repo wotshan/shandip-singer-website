@@ -6,6 +6,10 @@ import { AuthProvider } from "./_core/useAuth";
 import App from "./App";
 import "./index.css";
 
+// Marks the document as JS-enabled so the `.js .reveal` hidden state applies.
+// Without JS the class is never added and every section renders visible.
+document.documentElement.classList.add("js");
+
 function Root() {
   const [queryClient] = useState(() => new QueryClient());
   const [trpcClient] = useState(() => makeTrpcClient());

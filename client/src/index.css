@@ -1,53 +1,81 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* Tailwind v4 is CSS-first: no tailwind.config / postcss / autoprefixer.
-   Dark mode is class-based (add `dark` on <html>/<body>); shadcn/ui token set. */
+/* Cinematic dark system for SHANDIP.
+   Tailwind v4 is CSS-first: no tailwind.config / postcss / autoprefixer.
+   Dark mode stays class-based (add `dark` on <html>); shadcn/ui token set retained
+   so components/ui/* keep resolving. */
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --radius: 0.5rem;
-  --background: hsl(0 0% 100%);
-  --foreground: hsl(222.2 84% 4.9%);
-  --card: hsl(0 0% 100%);
-  --card-foreground: hsl(222.2 84% 4.9%);
-  --primary: hsl(222.2 47.4% 11.2%);
-  --primary-foreground: hsl(210 40% 98%);
-  --secondary: hsl(210 40% 96.1%);
-  --secondary-foreground: hsl(222.2 47.4% 11.2%);
-  --muted: hsl(210 40% 96.1%);
-  --muted-foreground: hsl(215.4 16.3% 46.9%);
-  --accent: hsl(210 40% 96.1%);
-  --accent-foreground: hsl(222.2 47.4% 11.2%);
-  --destructive: hsl(0 84.2% 60.2%);
-  --destructive-foreground: hsl(210 40% 98%);
-  --border: hsl(214.3 31.8% 91.4%);
-  --input: hsl(214.3 31.8% 91.4%);
-  --ring: hsl(222.2 84% 4.9%);
+  --radius: 0.75rem;
+
+  /* Base canvas — near-black with a faint warm cast */
+  --background: hsl(0 0% 4%);
+  --foreground: hsl(0 0% 98%);
+
+  /* Layered surfaces: surface-1 (raised) -> 2 (card) -> 3 (overlay) */
+  --card: hsl(0 0% 7%);
+  --card-foreground: hsl(0 0% 98%);
+
+  --primary: hsl(352 74% 46%);
+  --primary-foreground: hsl(0 0% 100%);
+
+  --secondary: hsl(0 0% 12%);
+  --secondary-foreground: hsl(0 0% 96%);
+
+  --muted: hsl(0 0% 14%);
+  --muted-foreground: hsl(0 0% 62%);
+
+  --accent: hsl(352 60% 30%);
+  --accent-foreground: hsl(0 0% 100%);
+
+  --destructive: hsl(0 72% 45%);
+  --destructive-foreground: hsl(0 0% 100%);
+
+  --border: hsl(0 0% 16%);
+  --input: hsl(0 0% 18%);
+  --ring: hsl(352 74% 50%);
+
+  /* Custom cinematic tokens */
+  --surface-1: hsl(0 0% 6%);
+  --surface-2: hsl(0 0% 8.5%);
+  --surface-3: hsl(0 0% 11%);
+  --border-subtle: hsl(0 0% 13%);
+  --border-strong: hsl(0 0% 22%);
+  --ink-faint: hsl(0 0% 45%);
+  --crimson: hsl(352 74% 46%);
+  --crimson-soft: hsl(352 60% 34%);
+  --ember: hsl(18 80% 52%);
+  --glass: hsla(0 0% 100% / 0.035);
+  --glass-border: hsla(0 0% 100% / 0.08);
+  --font-display: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
+/* The app is dark-first; keep .dark identical so a `dark` class on <html> is a no-op. */
 .dark {
-  --background: hsl(222.2 84% 4.9%);
-  --foreground: hsl(210 40% 98%);
-  --card: hsl(222.2 84% 4.9%);
-  --card-foreground: hsl(210 40% 98%);
-  --primary: hsl(210 40% 98%);
-  --primary-foreground: hsl(222.2 47.4% 11.2%);
-  --secondary: hsl(217.2 32.6% 17.5%);
-  --secondary-foreground: hsl(210 40% 98%);
-  --muted: hsl(217.2 32.6% 17.5%);
-  --muted-foreground: hsl(215 20.2% 65.1%);
-  --accent: hsl(217.2 32.6% 17.5%);
-  --accent-foreground: hsl(210 40% 98%);
-  --destructive: hsl(0 62.8% 30.6%);
-  --destructive-foreground: hsl(210 40% 98%);
-  --border: hsl(217.2 32.6% 17.5%);
-  --input: hsl(217.2 32.6% 17.5%);
-  --ring: hsl(212.7 26.8% 83.9%);
+  --background: hsl(0 0% 4%);
+  --foreground: hsl(0 0% 98%);
+  --card: hsl(0 0% 7%);
+  --card-foreground: hsl(0 0% 98%);
+  --primary: hsl(352 74% 46%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(0 0% 12%);
+  --secondary-foreground: hsl(0 0% 96%);
+  --muted: hsl(0 0% 14%);
+  --muted-foreground: hsl(0 0% 62%);
+  --accent: hsl(352 60% 30%);
+  --accent-foreground: hsl(0 0% 100%);
+  --destructive: hsl(0 72% 45%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(0 0% 16%);
+  --input: hsl(0 0% 18%);
+  --ring: hsl(352 74% 50%);
 }
 
-/* Map design tokens to Tailwind's theme so utilities (bg-primary, border-border,
-   rounded-lg, …) resolve. @theme inline references the vars above unwrapped. */
+/* Map design tokens to Tailwind's theme so utilities resolve. */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -66,17 +94,181 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
+  --color-ink-faint: var(--ink-faint);
+  --color-crimson: var(--crimson);
+  --color-crimson-soft: var(--crimson-soft);
+  --color-ember: var(--ember);
+
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 12px);
 }
 
 @layer base {
   * {
     @apply border-border;
   }
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+  ::selection {
+    background: hsla(352 74% 46% / 0.35);
+    color: #fff;
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+/* ── Utilities ─────────────────────────────────────────────────────────── */
+
+.eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: 0.94;
+  letter-spacing: -0.02em;
+}
+
+.glass {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.ambience {
+  background:
+    radial-gradient(60% 50% at 18% 12%, hsla(352 74% 30% / 0.26), transparent 62%),
+    radial-gradient(48% 42% at 88% 88%, hsla(18 70% 26% / 0.2), transparent 60%),
+    radial-gradient(80% 60% at 50% 108%, hsla(352 60% 22% / 0.24), transparent 68%);
+}
+
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.rule {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-strong) 18%, var(--border-strong) 82%, transparent);
+}
+
+/* ── Motion ────────────────────────────────────────────────────────────── */
+
+@keyframes marquee-left {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+@keyframes marquee-right {
+  from { transform: translate3d(-50%, 0, 0); }
+  to   { transform: translate3d(0, 0, 0); }
+}
+@keyframes float-slow {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50%      { transform: translate3d(0, -14px, 0); }
+}
+@keyframes fade-up {
+  from { opacity: 0; transform: translate3d(0, 22px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+.animate-float-slow { animation: float-slow 9s ease-in-out infinite; }
+.animate-marquee-left { animation: marquee-left var(--marquee-duration, 40s) linear infinite; }
+.animate-marquee-right { animation: marquee-right var(--marquee-duration, 40s) linear infinite; }
+.marquee-track:hover .animate-marquee-left,
+.marquee-track:hover .animate-marquee-right,
+.marquee-track:focus-within .animate-marquee-left,
+.marquee-track:focus-within .animate-marquee-right {
+  animation-play-state: paused;
+}
+
+/* Scroll reveal — JS-scoped so content is never hidden without JS. */
+.js .reveal {
+  opacity: 0;
+  transform: translate3d(0, 26px, 0);
+  transition: opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+.js .reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+.js .reveal[data-delay="1"] { transition-delay: 0.08s; }
+.js .reveal[data-delay="2"] { transition-delay: 0.16s; }
+.js .reveal[data-delay="3"] { transition-delay: 0.24s; }
+.js .reveal[data-delay="4"] { transition-delay: 0.32s; }
+.js .reveal[data-delay="5"] { transition-delay: 0.4s; }
+
+/* Marquee edge fade — mask on the container, not the moving track. */
+.edge-fade {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+
+/*
+  Tailwind grid/flex children default to `min-width: auto`, so any nowrap or
+  `truncate` descendant (or a long unbroken token like a URL) sets a min-content
+  floor on its track — which pushes the whole column wider than a phone viewport
+  and lets the page scroll sideways. Zeroing it lets `truncate` actually clamp.
+*/
+.grid > *,
+.flex > * {
+  min-width: 0;
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .js .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .animate-marquee-left,
+  .animate-marquee-right {
+    animation: none !important;
   }
 }

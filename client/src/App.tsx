@@ -1,33 +1,31 @@
-import type { ReactNode } from "react";
-import { Route, Switch, Redirect } from "wouter";
-import { useAuth } from "./_core/useAuth";
+import { Switch, Route } from "wouter";
+import { Layout } from "./components/Layout";
 import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import Dashboard from "./pages/Dashboard";
+import About from "./pages/About";
+import { OccasionsPage } from "./pages/About";
+import Events from "./pages/Events";
+import Music from "./pages/Music";
+import Availability from "./pages/Availability";
+import Contact from "./pages/Contact";
+import NotFound from "./pages/NotFound";
 
-// Route guard: redirect anonymous users to /login. Depends only on useAuth —
-// never on the session mechanism.
-function Protected({ children }: { children: ReactNode }) {
-  const { user, isLoading } = useAuth();
-  if (isLoading) return <div className="p-8 text-muted-foreground">Loading…</div>;
-  if (!user) return <Redirect to="/login" />;
-  return <>{children}</>;
-}
-
-// Agent wires business routes here (wouter).
+/**
+ * Route table. Every navigation target in the app must have a route entry here —
+ * the catch-all stays last so nothing below it is unreachable.
+ */
 export default function App() {
   return (
-    <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/login" component={Login} />
-      <Route path="/signup" component={Signup} />
-      <Route path="/dashboard">
-        <Protected>
-          <Dashboard />
-        </Protected>
-      </Route>
-      <Route>{() => <div className="p-8">Not found</div>}</Route>
-    </Switch>
+    <Layout>
+      <Switch>
+        <Route path="/" component={Home} />
+        <Route path="/about" component={About} />
+        <Route path="/events" component={Events} />
+        <Route path="/music" component={Music} />
+        <Route path="/occasions" component={OccasionsPage} />
+        <Route path="/availability" component={Availability} />
+        <Route path="/contact" component={Contact} />
+        <Route component={NotFound} />
+      </Switch>
+    </Layout>
   );
 }
