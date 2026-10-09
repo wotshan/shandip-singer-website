@@ -8,6 +8,20 @@
       "when": 1791555282497,
       "tag": "0000_goofy_prowler",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791565960107,
+      "tag": "0001_friendly_shiver_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791565987190,
+      "tag": "0002_magical_kingpin",
+      "breakpoints": true
     }
   ]
 }

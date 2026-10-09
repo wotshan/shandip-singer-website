@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { ArrowRight, Play } from "lucide-react";
-import { site } from "@/data/site";
+import { useSiteContent } from "@/content/SiteContentProvider";
 
 /**
  * Cinematic hero. The headline is the artist name set large in the display
@@ -8,6 +8,8 @@ import { site } from "@/data/site";
  * always sits on a readable surface.
  */
 export function Hero() {
+  const { settings } = useSiteContent();
+
   return (
     <section
       aria-label="Introduction"
@@ -35,21 +37,21 @@ export function Hero() {
           style={{ animation: "fade-up 0.9s cubic-bezier(0.22,1,0.36,1) 0.1s forwards" }}
         >
           <span className="h-px w-10 bg-crimson" aria-hidden="true" />
-          {site.role}
+          {settings.role}
         </p>
 
         <h1
           className="display text-[clamp(3.5rem,16vw,11rem)] text-foreground opacity-0"
           style={{ animation: "fade-up 1s cubic-bezier(0.22,1,0.36,1) 0.25s forwards" }}
         >
-          {site.artist}
+          {settings.artist}
         </h1>
 
         <p
           className="mt-7 max-w-2xl text-[clamp(1rem,2.4vw,1.375rem)] font-medium uppercase leading-relaxed tracking-[0.12em] text-muted-foreground opacity-0"
           style={{ animation: "fade-up 1s cubic-bezier(0.22,1,0.36,1) 0.42s forwards" }}
         >
-          {site.tagline}
+          {settings.tagline}
         </p>
 
         <div
@@ -76,7 +78,7 @@ export function Hero() {
         </div>
 
         <p className="mt-10 text-xs uppercase tracking-[0.2em] text-ink-faint">
-          {site.cities}
+          {settings.cities}
         </p>
       </div>
     </section>

@@ -1,92 +1,10 @@
-// MUSIC CATALOGUE — placeholder links only.
-// No track here is a real release. Each `href` is a placeholder anchor so the
-// card interactions work; swap in real Spotify / YouTube / Apple Music URLs
-// when they exist. Do not present these as released music.
+// Fallback repertoire \u2014 the set types SHANDIP performs.
+// No streaming links or track durations are claimed, because none exist yet.
+import type { MusicItem } from "@shared/types";
 
-export type MusicCategory =
-  | "Acoustic Covers"
-  | "Bollywood"
-  | "Romantic"
-  | "Original Music"
-  | "Live Sessions";
-
-export type MusicItem = {
-  id: string;
-  title: string;
-  category: MusicCategory;
-  /** Short descriptive line — mood, format, instrumentation. */
-  blurb: string;
-  /** Placeholder link. Replace with the real URL. */
-  href: string;
-  /** Display label for the link target. */
-  linkLabel: string;
-  duration: string;
-};
-
-export const musicLinksArePlaceholders = true;
-
-export const musicItems: MusicItem[] = [
-  {
-    id: "mus-01",
-    title: "Acoustic Covers — Set One",
-    category: "Acoustic Covers",
-    blurb: "Stripped-back guitar and vocals — the quiet half of an evening.",
-    href: "#placeholder-music",
-    linkLabel: "Link coming soon",
-    duration: "24 min",
-  },
-  {
-    id: "mus-02",
-    title: "Bollywood Live Medley",
-    category: "Bollywood",
-    blurb: "A continuous run through the songs every crowd sings back.",
-    href: "#placeholder-music",
-    linkLabel: "Link coming soon",
-    duration: "18 min",
-  },
-  {
-    id: "mus-03",
-    title: "Romantic Evenings",
-    category: "Romantic",
-    blurb: "Slow, warm arrangements for receptions and anniversaries.",
-    href: "#placeholder-music",
-    linkLabel: "Link coming soon",
-    duration: "22 min",
-  },
-  {
-    id: "mus-04",
-    title: "Original — Untitled Sessions",
-    category: "Original Music",
-    blurb: "Original compositions written and recorded in progress.",
-    href: "#placeholder-music",
-    linkLabel: "Link coming soon",
-    duration: "15 min",
-  },
-  {
-    id: "mus-05",
-    title: "Live Session — Club Night",
-    category: "Live Sessions",
-    blurb: "Full-band energy captured from a live club performance.",
-    href: "#placeholder-music",
-    linkLabel: "Link coming soon",
-    duration: "31 min",
-  },
-  {
-    id: "mus-06",
-    title: "Live Session — Wedding Set",
-    category: "Live Sessions",
-    blurb: "Excerpts from a reception set, from entrance to last dance.",
-    href: "#placeholder-music",
-    linkLabel: "Link coming soon",
-    duration: "27 min",
-  },
-];
-
-/** Ordered category list for the filter row. */
-export const musicCategories: MusicCategory[] = [
-  "Acoustic Covers",
-  "Bollywood",
-  "Romantic",
-  "Original Music",
-  "Live Sessions",
+export const fallbackMusic: MusicItem[] = [
+  { id: "m-acoustic", title: "Acoustic Covers", category: "Acoustic Covers", blurb: "Stripped-back guitar and vocals \u2014 the quiet half of an evening.", href: null, linkLabel: null, duration: null, sortOrder: 0 },
+  { id: "m-bollywood", title: "Bollywood Live", category: "Bollywood", blurb: "A continuous run through the songs every crowd sings back.", href: null, linkLabel: null, duration: null, sortOrder: 1 },
+  { id: "m-romantic", title: "Romantic Evenings", category: "Romantic", blurb: "Slow, warm arrangements for receptions and anniversaries.", href: null, linkLabel: null, duration: null, sortOrder: 2 },
+  { id: "m-live", title: "Live Sessions", category: "Live Sessions", blurb: "Full-band energy captured from a live performance.", href: null, linkLabel: null, duration: null, sortOrder: 3 },
 ];

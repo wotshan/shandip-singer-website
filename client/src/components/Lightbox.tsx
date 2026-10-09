@@ -6,7 +6,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import type { GalleryItem } from "@/data/gallery";
+import type { GalleryItem } from "@shared/types";
 
 type Props = {
   items: GalleryItem[];

@@ -1,6 +1,6 @@
 import { MapPin, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { LiveEvent } from "@/data/events";
+import type { EventItem } from "@shared/types";
 
 /** Format an ISO date as e.g. "14 Nov 2026". */
 function formatDate(iso: string) {
@@ -19,7 +19,7 @@ function dateParts(iso: string) {
   };
 }
 
-export function EventCard({ event }: { event: LiveEvent }) {
+export function EventCard({ event }: { event: EventItem }) {
   const { day, month } = dateParts(event.date);
   const confirmed = event.status === "Confirmed";
 
@@ -63,14 +63,15 @@ export function EventCard({ event }: { event: LiveEvent }) {
             <dt className="sr-only">Date and time</dt>
             <Clock className="h-4 w-4 shrink-0 text-ink-faint" aria-hidden="true" />
             <dd className="min-w-0">
-              {formatDate(event.date)} · {event.time}
+              {formatDate(event.date)}
+              {event.time ? ` · ${event.time}` : ""}
             </dd>
           </div>
           <div className="flex items-center gap-2.5 min-w-0">
             <dt className="sr-only">Venue and city</dt>
             <MapPin className="h-4 w-4 shrink-0 text-ink-faint" aria-hidden="true" />
             <dd className="min-w-0 truncate">
-              {event.venue} · {event.city}
+              {[event.venue, event.city].filter(Boolean).join(" · ")}
             </dd>
           </div>
         </dl>

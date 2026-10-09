@@ -14,12 +14,7 @@ import { EnquiryForm } from "@/components/EnquiryForm";
 import { Testimonials } from "@/components/Testimonials";
 import { ContactLinks } from "@/components/ContactLinks";
 import { SocialCarousel } from "@/components/SocialCarousel";
-import { SampleNotice } from "@/components/SampleNotice";
-import { site } from "@/data/site";
-import { upcomingEvents, eventsAreSample } from "@/data/events";
-import { musicItems, musicLinksArePlaceholders } from "@/data/music";
-import { galleryItems, galleryNote } from "@/data/gallery";
-import { occasions } from "@/data/occasions";
+import { useSiteContent } from "@/content/SiteContentProvider";
 
 /** Shared section shell so vertical rhythm is identical everywhere. */
 function Section({
@@ -38,13 +33,25 @@ function Section({
   );
 }
 
+/** Designed empty state for a collection with no rows yet. */
+function EmptyState({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="rounded-3xl border border-dashed border-border-strong bg-surface-2 p-10 text-center">
+      <p className="font-display text-2xl text-foreground">{title}</p>
+      <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">{body}</p>
+    </div>
+  );
+}
+
 export default function Home() {
+  const { settings, events, music, gallery, occasions } = useSiteContent();
+
   return (
     <>
       <Hero />
       <Marquee />
 
-      {/* ── About ───────────────────────────────────────────────────────── */}
+      {/* ── About ─────────────────────────────────────────────────────────── */}
       <Section id="about">
         <div className="grid gap-12 lg:grid-cols-[1fr_1.1fr] lg:gap-16">
           <Reveal variant="left">
@@ -62,7 +69,7 @@ export default function Home() {
 
           <Reveal variant="right" delay={1} className="space-y-5">
             <p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
-              {site.longIntro}
+              {settings.longIntro}
             </p>
             <p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
               Every booking begins with a conversation — about the people in the room, the moments
@@ -80,7 +87,7 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ── Events ──────────────────────────────────────────────────────── */}
+      {/* ── Events ────────────────────────────────────────────────────────── */}
       <Section id="events" className="border-t border-border-subtle">
         <Reveal>
           <SectionHeading
@@ -90,22 +97,21 @@ export default function Home() {
           />
         </Reveal>
 
-        {eventsAreSample ? (
-          <Reveal delay={1} className="mt-8">
-            <SampleNotice>
-              These events are <strong className="text-foreground">sample demo content</strong> that
-              illustrates the card layout — they are not confirmed bookings. Real dates will replace
-              them.
-            </SampleNotice>
-          </Reveal>
-        ) : null}
-
-        <div className="mt-10 grid gap-4 lg:grid-cols-2">
-          {upcomingEvents.slice(0, 4).map((event, i) => (
-            <Reveal key={event.id} variant="scale" delay={((i % 2) + 1) as 1 | 2}>
-              <EventCard event={event} />
-            </Reveal>
-          ))}
+        <div className="mt-10">
+          {events.length === 0 ? (
+            <EmptyState
+              title="No dates announced yet"
+              body="Confirmed performances will be listed here as soon as they are locked in. In the meantime, send an enquiry for your own date."
+            />
+          ) : (
+            <div className="grid gap-4 lg:grid-cols-2">
+              {events.slice(0, 4).map((event, i) => (
+                <Reveal key={event.id} variant="scale" delay={((i % 2) + 1) as 1 | 2}>
+                  <EventCard event={event} />
+                </Reveal>
+              ))}
+            </div>
+          )}
         </div>
 
         <Reveal className="mt-8">
@@ -119,7 +125,7 @@ export default function Home() {
         </Reveal>
       </Section>
 
-      {/* ── Music ───────────────────────────────────────────────────────── */}
+      {/* ── Music ─────────────────────────────────────────────────────────── */}
       <Section id="music" className="border-t border-border-subtle">
         <Reveal>
           <SectionHeading
@@ -129,18 +135,8 @@ export default function Home() {
           />
         </Reveal>
 
-        {musicLinksArePlaceholders ? (
-          <Reveal delay={1} className="mt-8">
-            <SampleNotice>
-              Listening links are <strong className="text-foreground">placeholders</strong> for now.
-              No track shown here is a released recording — real streaming links will be added when
-              they are available.
-            </SampleNotice>
-          </Reveal>
-        ) : null}
-
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {musicItems.slice(0, 3).map((item, i) => (
+          {music.slice(0, 3).map((item, i) => (
             <Reveal key={item.id} variant="scale" delay={((i % 3) + 1) as 1 | 2 | 3}>
               <MusicCard item={item} />
             </Reveal>
@@ -158,7 +154,7 @@ export default function Home() {
         </Reveal>
       </Section>
 
-      {/* ── Gallery ────────────────────────────────────────────────────────── */}
+      {/* ── Gallery ───────────────────────────────────────────────────────── */}
       <Section id="gallery" className="border-t border-border-subtle">
         <Reveal>
           <SectionHeading
@@ -169,11 +165,7 @@ export default function Home() {
         </Reveal>
 
         <Reveal variant="scale" delay={1} className="mt-10">
-          <GalleryGrid items={galleryItems} />
-        </Reveal>
-
-        <Reveal className="mt-6">
-          <p className="text-xs leading-relaxed text-ink-faint">{galleryNote}</p>
+          <GalleryGrid items={gallery} />
         </Reveal>
 
         <Reveal className="mt-8">
@@ -187,7 +179,7 @@ export default function Home() {
         </Reveal>
       </Section>
 
-      {/* ── Occasions ────────────────────────────────────────────────────────── */}
+      {/* ── Occasions ─────────────────────────────────────────────────────── */}
       <Section id="occasions" className="border-t border-border-subtle">
         <Reveal>
           <SectionHeading
@@ -206,22 +198,15 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ── Availability ────────────────────────────────────────────────── */}
+      {/* ── Availability ──────────────────────────────────────────────────── */}
       <Section id="availability" className="border-t border-border-subtle">
         <div className="grid gap-12 lg:grid-cols-[1fr_1.2fr] lg:gap-16">
           <Reveal variant="left">
             <SectionHeading
               eyebrow="Availability"
               title="Is your date open?"
-              intro="A preview of how the booking calendar reads. Green dates are open; red ones are taken."
+              intro="A live view of the booking calendar. Green dates are open; red ones are taken."
             />
-            <div className="mt-8">
-              <SampleNotice>
-                This calendar is a <strong className="text-foreground">demo preview</strong> with
-                sample statuses. It is not connected to a live booking system — confirm any date
-                before planning around it.
-              </SampleNotice>
-            </div>
           </Reveal>
 
           <Reveal variant="right" delay={1}>
@@ -230,7 +215,7 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ── Enquiry ─────────────────────────────────────────────────────── */}
+      {/* ── Enquiry ───────────────────────────────────────────────────────── */}
       <Section id="enquiry" className="border-t border-border-subtle">
         <div className="grid gap-12 lg:grid-cols-[1fr_1.3fr] lg:gap-16">
           <Reveal variant="left">
@@ -251,12 +236,12 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ── Testimonials ────────────────────────────────────────────────── */}
+      {/* ── Testimonials ──────────────────────────────────────────────────── */}
       <div className="border-t border-border-subtle">
         <Testimonials />
       </div>
 
-      {/* ── Contact CTA ─────────────────────────────────────────────────── */}
+      {/* ── Contact CTA ───────────────────────────────────────────────────── */}
       <Section id="contact" className="border-t border-border-subtle">
         <Reveal variant="scale">
           <div className="relative overflow-hidden rounded-3xl border border-border-subtle bg-surface-2 px-6 py-14 text-center sm:px-12 sm:py-20">
@@ -264,7 +249,7 @@ export default function Home() {
             <div className="relative">
               <p className="eyebrow mb-5">Let's make it a night to remember</p>
               <h2 className="display mx-auto max-w-3xl text-[clamp(2rem,6vw,4rem)] text-foreground">
-                {site.tagline}
+                {settings.tagline}
               </h2>
               <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
                 <Link
@@ -280,7 +265,7 @@ export default function Home() {
                   Explore my music
                 </Link>
               </div>
-              <p className="mt-8 text-xs uppercase tracking-[0.2em] text-ink-faint">{site.travelNote}</p>
+              <p className="mt-8 text-xs uppercase tracking-[0.2em] text-ink-faint">{settings.travelNote}</p>
             </div>
           </div>
         </Reveal>
@@ -288,7 +273,7 @@ export default function Home() {
 
       {/* ── Social carousel ───────────────────────────────────────────────── */}
       <section
-        aria-label="Follow SHANDIP"
+        aria-label={`Follow ${settings.artist}`}
         className="border-t border-border-subtle bg-surface-1 py-14 sm:py-20"
       >
         <Reveal>

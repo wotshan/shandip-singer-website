@@ -1,8 +1,8 @@
 import { Link } from "wouter";
 import { ArrowUpRight } from "lucide-react";
-import type { Occasion } from "@/data/occasions";
+import type { OccasionItem } from "@shared/types";
 
-export function OccasionCard({ occasion, index }: { occasion: Occasion; index: number }) {
+export function OccasionCard({ occasion, index }: { occasion: OccasionItem; index: number }) {
   return (
     <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border-subtle bg-surface-2 p-6 transition-all duration-400 hover:-translate-y-1.5 hover:border-crimson/40 sm:p-7">
       {/* index watermark */}
@@ -16,14 +16,16 @@ export function OccasionCard({ occasion, index }: { occasion: Occasion; index: n
       <h3 className="font-display text-2xl leading-tight text-foreground">{occasion.title}</h3>
       <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{occasion.blurb}</p>
 
-      <ul className="mt-5 space-y-2">
-        {occasion.includes.map((line) => (
-          <li key={line} className="flex items-start gap-2.5 text-[0.8125rem] text-muted-foreground">
-            <span aria-hidden="true" className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-crimson" />
-            {line}
-          </li>
-        ))}
-      </ul>
+      {occasion.includes.length > 0 ? (
+        <ul className="mt-5 space-y-2">
+          {occasion.includes.map((line) => (
+            <li key={line} className="flex items-start gap-2.5 text-[0.8125rem] text-muted-foreground">
+              <span aria-hidden="true" className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-crimson" />
+              {line}
+            </li>
+          ))}
+        </ul>
+      ) : null}
 
       <Link
         href="/contact"

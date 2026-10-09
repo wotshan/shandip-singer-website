@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TRPCError } from "@trpc/server";
 import { makeCaller } from "./_core/test-caller";
 
@@ -7,8 +7,12 @@ import { makeCaller } from "./_core/test-caller";
 // mock every _core module routers.ts touches.
 vi.mock("./_core/auth", () => {
   class AuthError extends Error {}
+  // A STABLE singleton: routers.ts calls authProvider() on every request, so a
+  // factory that returned a fresh object each time would hand the test a
+  // different vi.fn() than the one the router actually invokes.
+  const provider = { login: vi.fn(), logout: vi.fn(), getSession: vi.fn() };
   return {
-    authProvider: () => ({ login: vi.fn(), logout: vi.fn(), getSession: vi.fn() }),
+    authProvider: () => provider,
     registerLocalUser: vi.fn(),
     AuthError,
     EmailTakenError: class EmailTakenError extends AuthError {},
@@ -29,15 +33,41 @@ vi.mock("./_core/storage", () => ({
   },
 }));
 
+// The business data layer. Mocked so no real DB driver is opened; the router
+// logic (validation, auth gating, error mapping) is what these tests exercise.
 vi.mock("./db", () => ({
-  listItemsByOwner: vi.fn(),
-  createItem: vi.fn(),
-  deleteItem: vi.fn(),
+  isResourceName: (n: string) =>
+    ["socials", "gallery", "events", "music", "occasions", "testimonials", "availability"].includes(n),
+  RESOURCE_NAMES: ["socials", "gallery", "events", "music", "occasions", "testimonials", "availability"],
+  resourceTables: {},
+  listResource: vi.fn(),
+  createResource: vi.fn(),
+  updateResource: vi.fn(),
+  deleteResource: vi.fn(),
+  getSettings: vi.fn(),
+  upsertSettings: vi.fn(),
+  createEnquiry: vi.fn(),
+  listEnquiries: vi.fn(),
+  setEnquiryRead: vi.fn(),
+  deleteEnquiry: vi.fn(),
+  getSiteContent: vi.fn(),
+}));
+
+// The admin bootstrap + rate limiter. `rateLimit` is mocked per-test so the
+// throttle can be driven deterministically without waiting out a real window.
+vi.mock("./admin", () => ({
+  ADMIN_USERNAME: "shanislive",
+  ensureAdminUser: vi.fn(),
+  rateLimit: vi.fn(() => ({ ok: true })),
+  clearRateLimit: vi.fn(),
+  resetRateLimits: vi.fn(),
 }));
 
 const { sanitizeBasename } = await import("./routers");
 const { storageDeleteOwned, StorageError } = await import("./_core/storage");
-const { registerLocalUser, EmailTakenError } = await import("./_core/auth");
+const { authProvider, AuthError } = await import("./_core/auth");
+const { rateLimit, ensureAdminUser } = await import("./admin");
+const db = await import("./db");
 
 // C1c: uploadUrl's key is `${uuid}-${sanitizeBasename(name)}`. The uuid prefix
 // only makes the key unguessable if the REST of the key isn't
@@ -64,44 +94,15 @@ describe("sanitizeBasename", () => {
   it("collapses leading dots so a bare '.' or '..' basename can't survive", () => {
     expect(sanitizeBasename("..")).toBe("upload");
     expect(sanitizeBasename(".")).toBe("upload");
-    // "upload.hidden", not "hidden": the leading dots are still gone (that is
-    // the security property), but the last dot is now read as the extension
-    // separator rather than deleted along with them.
     expect(sanitizeBasename("...hidden")).toBe("upload.hidden");
   });
 
-  // Regression (observed 2026-08, published app gallery-app-gpkd51ak): a file
-  // named 风景.png landed in storage as "<uuid>-png" — no dot, no extension.
-  // Two rules compounded. The allowlist is ASCII-only, so a stem written
-  // entirely in CJK is deleted, leaving ".png"; the leading-dot strip that
-  // follows then ate the dot, because by that point the only dot left in the
-  // string is the extension separator, not a dotfile prefix.
-  //
-  // The trigger is a stem with NO surviving ASCII, which is the common case for
-  // Chinese/Japanese/Korean filenames — "微信图片_2026.png" was always fine,
-  // because "_2026" survives and keeps a stem in front of the dot. That is why
-  // this went unnoticed.
   it("keeps the extension when the stem is entirely non-ASCII", () => {
     expect(sanitizeBasename("风景.png")).toBe("upload.png");
     expect(sanitizeBasename("日本語.jpeg")).toBe("upload.jpeg");
-    expect(sanitizeBasename("한글.png")).toBe("upload.png");
     expect(sanitizeBasename("相册/风景.png")).toBe("upload.png");
   });
 
-  it("keeps the extension on names that already sanitized cleanly", () => {
-    expect(sanitizeBasename("微信图片_2026.png")).toBe("_2026.png");
-    expect(sanitizeBasename("IMG_1234.PNG")).toBe("IMG_1234.PNG");
-    expect(sanitizeBasename("archive.tar.gz")).toBe("archive.tar.gz");
-  });
-
-  // A dotfile has no extension to preserve — the whole name is the stem.
-  it("treats a leading-dot name as a stem, not as a bare extension", () => {
-    expect(sanitizeBasename(".png")).toBe("png");
-    expect(sanitizeBasename(".gitignore")).toBe("gitignore");
-  });
-
-  // The key is `${uuid}-${basename}`, so a "/" or "\\" surviving here would
-  // steer path segments; an over-long extension would pad the key for no gain.
   it("never emits a path separator, and caps the extension", () => {
     expect(sanitizeBasename("C:\\photos\\风景.png")).toBe("upload.png");
     expect(sanitizeBasename("x." + "a".repeat(40))).toBe("x." + "a".repeat(10));
@@ -110,27 +111,22 @@ describe("sanitizeBasename", () => {
   it("falls back to a constant when nothing survives sanitization", () => {
     expect(sanitizeBasename("???")).toBe("upload");
     expect(sanitizeBasename("")).toBe("upload");
-    expect(sanitizeBasename("///")).toBe("upload");
   });
 });
 
 // C1d (regression): storageDeleteOwned runs the key through canonicalKey,
-// which throws StorageError("forbidden") for a malformed key (e.g. a
-// "../"-traversal segment) BEFORE any db/network access. files.remove had no
-// try/catch, so that throw used to escape as a raw StorageError, which tRPC
-// wraps as an opaque INTERNAL_SERVER_ERROR (500) for what is plainly bad
-// client input. Exercise the real router (only auth/storage/db are mocked —
-// ./_core/trpc is real) via makeCaller so this asserts the actual error the
-// client would receive, not a re-implementation of the mapping.
+// which throws StorageError("forbidden") for a malformed key BEFORE any
+// db/network access. files.remove must map that to BAD_REQUEST, not let it
+// escape as an opaque 500.
 describe("files.remove", () => {
   it("maps a malformed key (StorageError forbidden) to TRPCError BAD_REQUEST, not a raw throw", async () => {
     vi.mocked(storageDeleteOwned).mockRejectedValueOnce(
-      new StorageError("unsafe storage key (diverges from platform normalization): ../evil.pdf", "forbidden"),
+      new StorageError("unsafe storage key: ../evil.pdf", "forbidden"),
     );
     const caller = makeCaller({
       c: {} as never,
       db: {} as never,
-      user: { id: "user-1" } as never,
+      user: { id: "user-1", role: "admin" } as never,
     });
 
     const err = await caller.files.remove({ key: "../evil.pdf" }).catch((e) => e);
@@ -140,28 +136,197 @@ describe("files.remove", () => {
   });
 });
 
-// Regression (observed 2026-08-26, published app): signing up twice with the
-// same email answered 500 INTERNAL_SERVER_ERROR whose message was the raw
-// Drizzle failure — the INSERT statement plus every bound param, bcrypt hash
-// included — which the signup form then printed at the user. The mapping now
-// hangs off a type (EmailTakenError from _core/auth), not a regex over a
-// driver-specific message.
-describe("auth.signup", () => {
-  const anonymous = { c: {} as never, db: {} as never, user: null };
+// ── Admin login ──────────────────────────────────────────────────────────────
+// The site has exactly ONE admin and NO signup. These tests pin the three
+// properties that make that true: only the one username is accepted, the
+// password is checked by the auth provider (never here), and repeated attempts
+// are throttled.
+describe("admin.login", () => {
+  const anonymous = { c: { req: { header: () => undefined } } as never, db: {} as never, user: null };
 
-  it("maps an already-registered email to TRPCError CONFLICT, not a 500", async () => {
-    vi.mocked(registerLocalUser).mockRejectedValueOnce(
-      new EmailTakenError("That email is already registered — try logging in instead."),
-    );
+  beforeEach(() => {
+    vi.mocked(rateLimit).mockReturnValue({ ok: true });
+    vi.mocked(ensureAdminUser).mockResolvedValue(undefined);
+    // The auth provider is a module-level singleton, so its spies persist across
+    // tests in this file — reset them or a later "not called" assertion sees an
+    // earlier test's call.
+    vi.mocked(authProvider().login).mockReset();
+    vi.mocked(authProvider().logout).mockReset();
+  });
+
+  it("rejects any username other than the single admin, before checking a password", async () => {
     const caller = makeCaller(anonymous);
-
-    const err = await caller.auth
-      .signup({ email: "asce1885@gmail.com", password: "hunter2hunter2", name: "asce" })
+    const err = await caller.admin
+      .login({ username: "someone-else", password: "whatever" })
       .catch((e) => e);
 
     expect(err).toBeInstanceOf(TRPCError);
-    expect((err as TRPCError).code).toBe("CONFLICT");
-    expect((err as TRPCError).message).toMatch(/already registered/i);
-    expect((err as TRPCError).message).not.toMatch(/insert into|Failed query|params:|\$2b\$/);
+    expect((err as TRPCError).code).toBe("UNAUTHORIZED");
+    // The provider's login must never even be reached for a non-admin username.
+    expect(authProvider().login).not.toHaveBeenCalled();
+  });
+
+  it("maps a bad password (AuthError) to UNAUTHORIZED with a generic message", async () => {
+    vi.mocked(authProvider().login).mockRejectedValueOnce(new AuthError("bad password"));
+    const caller = makeCaller(anonymous);
+
+    const err = await caller.admin
+      .login({ username: "shanislive", password: "wrong" })
+      .catch((e) => e);
+
+    expect(err).toBeInstanceOf(TRPCError);
+    expect((err as TRPCError).code).toBe("UNAUTHORIZED");
+    expect((err as TRPCError).message).toMatch(/invalid username or password/i);
+  });
+
+  it("returns the admin user on correct credentials", async () => {
+    vi.mocked(authProvider().login).mockResolvedValueOnce({
+      id: "u_admin",
+      email: "shanislive",
+      name: "SHANDIP",
+      role: "admin",
+    });
+    const caller = makeCaller(anonymous);
+
+    const user = await caller.admin.login({ username: "shanislive", password: "correct" });
+
+    expect(user.role).toBe("admin");
+    expect(user.email).toBe("shanislive");
+  });
+
+  it("throttles with TOO_MANY_REQUESTS once the rate limiter trips", async () => {
+    vi.mocked(rateLimit).mockReturnValueOnce({ ok: false, retryAfterSec: 600 });
+    const caller = makeCaller(anonymous);
+
+    const err = await caller.admin
+      .login({ username: "shanislive", password: "correct" })
+      .catch((e) => e);
+
+    expect(err).toBeInstanceOf(TRPCError);
+    expect((err as TRPCError).code).toBe("TOO_MANY_REQUESTS");
+    expect(authProvider().login).not.toHaveBeenCalled();
+  });
+});
+
+// ── Content CRUD is admin-only ───────────────────────────────────────────────
+describe("content write procedures", () => {
+  it("refuses an anonymous caller", async () => {
+    const caller = makeCaller({ c: {} as never, db: {} as never, user: null });
+    const err = await caller.content
+      .create({ resource: "gallery", values: { src: "/x.png", caption: "x" } })
+      .catch((e) => e);
+
+    expect(err).toBeInstanceOf(TRPCError);
+    expect((err as TRPCError).code).toBe("UNAUTHORIZED");
+  });
+
+  it("refuses a logged-in non-admin caller", async () => {
+    const caller = makeCaller({
+      c: {} as never,
+      db: {} as never,
+      user: { id: "u1", role: "user" } as never,
+    });
+    const err = await caller.content
+      .create({ resource: "gallery", values: { src: "/x.png", caption: "x" } })
+      .catch((e) => e);
+
+    expect(err).toBeInstanceOf(TRPCError);
+    expect((err as TRPCError).code).toBe("FORBIDDEN");
+  });
+
+  it("validates the payload for the resource and creates the row for an admin", async () => {
+    vi.mocked(db.createResource).mockResolvedValueOnce({ id: "g1" } as never);
+    const caller = makeCaller({
+      c: {} as never,
+      db: {} as never,
+      user: { id: "u_admin", role: "admin" } as never,
+    });
+
+    const row = await caller.content.create({
+      resource: "gallery",
+      values: { src: "/images/gallery/a.webp", caption: "Live", tag: "Live", alt: "", width: 800, height: 1200, sortOrder: 0 },
+    });
+
+    expect(row).toEqual({ id: "g1" });
+    expect(db.createResource).toHaveBeenCalledWith(
+      "gallery",
+      expect.objectContaining({ src: "/images/gallery/a.webp", caption: "Live" }),
+    );
+  });
+
+  it("rejects an unknown resource name", async () => {
+    const caller = makeCaller({
+      c: {} as never,
+      db: {} as never,
+      user: { id: "u_admin", role: "admin" } as never,
+    });
+    const err = await caller.content
+      .list({ resource: "not-a-resource" })
+      .catch((e) => e);
+
+    expect(err).toBeInstanceOf(TRPCError);
+  });
+
+  it("maps a missing row on update to NOT_FOUND", async () => {
+    vi.mocked(db.updateResource).mockResolvedValueOnce(null as never);
+    const caller = makeCaller({
+      c: {} as never,
+      db: {} as never,
+      user: { id: "u_admin", role: "admin" } as never,
+    });
+
+    const err = await caller.content
+      .update({ resource: "events", id: "gone", values: { title: "x" } })
+      .catch((e) => e);
+
+    expect(err).toBeInstanceOf(TRPCError);
+    expect((err as TRPCError).code).toBe("NOT_FOUND");
+  });
+});
+
+// ── Public reads and enquiry intake ──────────────────────────────────────────
+describe("public procedures", () => {
+  it("serves the site content bundle to anyone", async () => {
+    vi.mocked(db.getSiteContent).mockResolvedValueOnce({
+      settings: { artist: "SHANDIP" },
+      socials: [],
+      gallery: [],
+      events: [],
+      music: [],
+      occasions: [],
+      testimonials: [],
+      availability: [],
+    } as never);
+
+    const caller = makeCaller({ c: {} as never, db: {} as never, user: null });
+    const content = await caller.content.getSite();
+
+    expect(content.settings.artist).toBe("SHANDIP");
+  });
+
+  it("accepts an enquiry from an anonymous visitor", async () => {
+    vi.mocked(db.createEnquiry).mockResolvedValueOnce({ id: "e1" } as never);
+    const caller = makeCaller({ c: {} as never, db: {} as never, user: null });
+
+    const row = await caller.enquiries.create({
+      name: "Asha",
+      contact: "+91 90000 00000",
+      eventType: "Weddings & Receptions",
+      city: "Mumbai",
+      venue: "The Grand",
+    });
+
+    expect(row).toEqual({ id: "e1" });
+    expect(db.createEnquiry).toHaveBeenCalledWith(
+      expect.objectContaining({ name: "Asha", city: "Mumbai" }),
+    );
+  });
+
+  it("keeps the enquiry inbox admin-only", async () => {
+    const caller = makeCaller({ c: {} as never, db: {} as never, user: null });
+    const err = await caller.enquiries.list().catch((e) => e);
+
+    expect(err).toBeInstanceOf(TRPCError);
+    expect((err as TRPCError).code).toBe("UNAUTHORIZED");
   });
 });

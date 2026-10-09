@@ -4,13 +4,15 @@ import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Reveal } from "@/components/Reveal";
 import { MusicCard } from "@/components/MusicCard";
-import { SampleNotice } from "@/components/SampleNotice";
 import { PageHeader } from "./About";
-import { musicItems, musicCategories, musicLinksArePlaceholders, type MusicCategory } from "@/data/music";
+import { useSiteContent } from "@/content/SiteContentProvider";
 
 export default function Music() {
-  const [filter, setFilter] = useState<MusicCategory | "All">("All");
-  const shown = filter === "All" ? musicItems : musicItems.filter((m) => m.category === filter);
+  const { music } = useSiteContent();
+  const [filter, setFilter] = useState<string>("All");
+
+  const categories = Array.from(new Set(music.map((m) => m.category).filter(Boolean)));
+  const shown = filter === "All" ? music : music.filter((m) => m.category === filter);
 
   return (
     <>
@@ -21,40 +23,32 @@ export default function Music() {
       />
 
       <section className="mx-auto max-w-7xl px-5 py-20 sm:px-8 sm:py-28">
-        {musicLinksArePlaceholders ? (
-          <Reveal>
-            <SampleNotice>
-              Listening links are <strong className="text-foreground">placeholders</strong>. Nothing
-              on this page is a released recording, and no track is claimed as a real release —
-              streaming links will be added once they exist.
-            </SampleNotice>
+        {/* Category filter */}
+        {categories.length > 1 ? (
+          <Reveal className="mt-2">
+            <div role="group" aria-label="Filter by category" className="flex flex-wrap gap-2">
+              {(["All", ...categories] as const).map((c) => {
+                const active = filter === c;
+                return (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setFilter(c)}
+                    aria-pressed={active}
+                    className={cn(
+                      "rounded-full border px-4 py-2 text-xs font-medium tracking-wide transition-colors",
+                      active
+                        ? "border-crimson/60 bg-crimson/15 text-foreground"
+                        : "border-border-subtle text-muted-foreground hover:border-border-strong hover:text-foreground",
+                    )}
+                  >
+                    {c}
+                  </button>
+                );
+              })}
+            </div>
           </Reveal>
         ) : null}
-
-        {/* Category filter */}
-        <Reveal delay={1} className="mt-10">
-          <div role="group" aria-label="Filter by category" className="flex flex-wrap gap-2">
-            {(["All", ...musicCategories] as const).map((c) => {
-              const active = filter === c;
-              return (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setFilter(c)}
-                  aria-pressed={active}
-                  className={cn(
-                    "rounded-full border px-4 py-2 text-xs font-medium tracking-wide transition-colors",
-                    active
-                      ? "border-crimson/60 bg-crimson/15 text-foreground"
-                      : "border-border-subtle text-muted-foreground hover:border-border-strong hover:text-foreground",
-                  )}
-                >
-                  {c}
-                </button>
-              );
-            })}
-          </div>
-        </Reveal>
 
         {/* Grid — with a designed empty state if a filter matches nothing */}
         <div className="mt-10">

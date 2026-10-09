@@ -3,9 +3,11 @@ import { ArrowRight } from "lucide-react";
 import { PageHeader } from "./About";
 import { Reveal } from "@/components/Reveal";
 import { GalleryGrid } from "@/components/GalleryGrid";
-import { galleryItems, galleryNote } from "@/data/gallery";
+import { useSiteContent } from "@/content/SiteContentProvider";
 
 export default function Gallery() {
+  const { gallery } = useSiteContent();
+
   return (
     <>
       <PageHeader
@@ -15,13 +17,20 @@ export default function Gallery() {
       />
 
       <section className="mx-auto max-w-7xl px-5 py-20 sm:px-8 sm:py-28">
-        <Reveal>
-          <GalleryGrid items={galleryItems} />
-        </Reveal>
-
-        <Reveal className="mt-6">
-          <p className="text-xs leading-relaxed text-ink-faint">{galleryNote}</p>
-        </Reveal>
+        {gallery.length === 0 ? (
+          <Reveal>
+            <div className="rounded-3xl border border-dashed border-border-strong bg-surface-2 p-12 text-center">
+              <p className="font-display text-2xl text-foreground">No photos yet</p>
+              <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">
+                Performance photographs will appear here as they are added.
+              </p>
+            </div>
+          </Reveal>
+        ) : (
+          <Reveal>
+            <GalleryGrid items={gallery} />
+          </Reveal>
+        )}
 
         <Reveal className="mt-14">
           <div className="flex flex-col gap-6 rounded-3xl border border-border-subtle bg-surface-2 p-8 sm:flex-row sm:items-center sm:justify-between sm:p-10">

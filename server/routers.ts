@@ -1,47 +1,25 @@
 // ── AGENT-OWNED: tRPC API surface ────────────────────────────────────────────
-// Compose the app's procedures here. Keep them thin: validate input with zod,
-// call server/db.ts for data and server/services/* for external integrations.
-// Auth is provided by _core — do NOT reimplement sessions. Access levels:
+// Thin procedures: validate input with zod, call server/db.ts for data. Auth is
+// provided by _core — do NOT reimplement sessions. Access levels:
 // publicProcedure (anyone) / protectedProcedure (ctx.user set) / adminProcedure.
+//
+// SHANDIP has exactly ONE admin and NO signup: the account is bootstrapped
+// server-side (server/admin.ts) and the only way in is `admin.login`, which is
+// rate-limited. Every content write goes through `adminProcedure`.
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { router, publicProcedure, protectedProcedure } from "./_core/trpc";
-import { authProvider, registerLocalUser, AuthError, EmailTakenError } from "./_core/auth";
+import { router, publicProcedure, adminProcedure } from "./_core/trpc";
+import { authProvider, AuthError } from "./_core/auth";
 import { storageCommit, storageDeleteOwned, storageListByOwner, storagePutUrl, StorageError } from "./_core/storage";
+import { ADMIN_USERNAME, clearRateLimit, ensureAdminUser, rateLimit } from "./admin";
 import * as q from "./db";
+import { isResourceName, type ResourceName } from "./db";
 
-// Auth: login/logout are provider-agnostic (go through the AuthProvider).
-// signup is LOCAL-only (SSO signup happens at the IdP) — guard if you switch.
+// ── Auth ─────────────────────────────────────────────────────────────────────
+// No signup procedure exists on purpose: the single admin is created by
+// ensureAdminUser(). `me` and `logout` are provider-agnostic.
 const authRouter = router({
   me: publicProcedure.query(({ ctx }) => ctx.user),
-
-  signup: publicProcedure
-    .input(z.object({ email: z.email(), password: z.string().min(8), name: z.string().optional() }))
-    .mutation(async ({ ctx, input }) => {
-      try {
-        const user = await registerLocalUser(input.email, input.password, input.name);
-        await authProvider().login(ctx.c, input.email, input.password); // set session cookie
-        return user;
-      } catch (e: unknown) {
-        // CONFLICT, not a 500: the request was well-formed, the address is just
-        // taken. registerLocalUser has already turned the driver's SQLSTATE
-        // 23505 into this type — never pattern-match a DB error message here,
-        // Drizzle hides it behind a "Failed query: <sql>" wrapper.
-        if (e instanceof EmailTakenError) throw new TRPCError({ code: "CONFLICT", message: e.message });
-        throw e;
-      }
-    }),
-
-  login: publicProcedure
-    .input(z.object({ email: z.email(), password: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      try {
-        return await authProvider().login(ctx.c, input.email, input.password);
-      } catch (e) {
-        if (e instanceof AuthError) throw new TRPCError({ code: "UNAUTHORIZED", message: e.message });
-        throw e;
-      }
-    }),
 
   logout: publicProcedure.mutation(async ({ ctx }) => {
     await authProvider().logout(ctx.c);
@@ -49,66 +27,233 @@ const authRouter = router({
   }),
 });
 
-// Example business router (items). Every procedure is owner-scoped via ctx.user.
-const itemsRouter = router({
-  list: protectedProcedure.query(({ ctx }) => q.listItemsByOwner(ctx.user.id)),
+// ── Admin login (username + password, rate-limited) ──────────────────────────
+function clientKey(c: { req: { header: (n: string) => string | undefined } }): string {
+  const fwd = c.req.header("x-forwarded-for")?.split(",")[0]?.trim();
+  return fwd || c.req.header("x-real-ip") || "unknown";
+}
 
-  create: protectedProcedure
-    .input(z.object({ title: z.string().min(1), notes: z.string().optional(), coverUrl: z.string().optional() }))
-    .mutation(({ ctx, input }) => q.createItem({ ownerId: ctx.user.id, ...input })),
+const adminRouter = router({
+  login: publicProcedure
+    .input(z.object({ username: z.string().min(1), password: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const key = clientKey(ctx.c);
+      const limit = rateLimit(key);
+      if (!limit.ok) {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: `Too many attempts. Try again in ${Math.ceil(limit.retryAfterSec / 60)} minute(s).`,
+        });
+      }
 
-  remove: protectedProcedure
-    .input(z.object({ id: z.uuid() }))
-    .mutation(({ ctx, input }) => q.deleteItem(input.id, ctx.user.id)),
+      // Only the one admin username is accepted — anything else is rejected
+      // before a password comparison, so no other account can ever log in here.
+      if (input.username.trim().toLowerCase() !== ADMIN_USERNAME) {
+        throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid username or password." });
+      }
+
+      await ensureAdminUser();
+
+      try {
+        const user = await authProvider().login(ctx.c, ADMIN_USERNAME, input.password);
+        if (user.role !== "admin") {
+          await authProvider().logout(ctx.c);
+          throw new TRPCError({ code: "FORBIDDEN", message: "This account is not an administrator." });
+        }
+        clearRateLimit(key);
+        return user;
+      } catch (e) {
+        if (e instanceof AuthError) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid username or password." });
+        }
+        throw e;
+      }
+    }),
 });
 
-// Sanitize a caller-supplied filename down to a safe key BASENAME: take the
-// last path segment (so "/../shared/report.pdf" can't steer the rest of the
-// key), keep only [A-Za-z0-9._-], strip leading dots (so a survivor of "." or
-// ".." can't slip through as a bare segment), and fall back to a fixed constant
-// when nothing survives. Exported so it can be unit-tested directly.
-//
-// The stem and the extension are sanitized SEPARATELY, and that split is the
-// whole point. Sanitizing the basename as one string used to destroy the
-// extension of any file whose stem was entirely non-ASCII: the allowlist below
-// deleted every CJK character in "风景.png", leaving ".png", and the leading-dot
-// strip — there to kill "." / ".." / dotfiles — then ate the extension
-// separator, because by that point it was the only dot left. The object landed
-// in storage as "<uuid>-png". Splitting first means the leading-dot rule only
-// ever sees the stem, where a leading dot really is a dotfile prefix.
+// ── Per-resource zod schemas ─────────────────────────────────────────────────
+const resourceSchemas = {
+  socials: z.object({
+    key: z.string().min(1),
+    label: z.string().min(1),
+    value: z.string().default(""),
+    href: z.string().min(1),
+    handle: z.string().default(""),
+    external: z.boolean().default(true),
+    sortOrder: z.number().int().default(0),
+  }),
+  gallery: z.object({
+    src: z.string().min(1),
+    width: z.number().int().positive().default(1200),
+    height: z.number().int().positive().default(1600),
+    caption: z.string().default(""),
+    tag: z.string().default(""),
+    alt: z.string().default(""),
+    sortOrder: z.number().int().default(0),
+  }),
+  events: z.object({
+    title: z.string().min(1),
+    date: z.string().min(1),
+    time: z.string().default(""),
+    venue: z.string().default(""),
+    city: z.string().default(""),
+    status: z.enum(["Confirmed", "On Hold"]).default("Confirmed"),
+    note: z.string().nullable().default(null),
+    sortOrder: z.number().int().default(0),
+  }),
+  music: z.object({
+    title: z.string().min(1),
+    category: z.string().default(""),
+    blurb: z.string().default(""),
+    href: z.string().nullable().default(null),
+    linkLabel: z.string().nullable().default(null),
+    duration: z.string().nullable().default(null),
+    sortOrder: z.number().int().default(0),
+  }),
+  occasions: z.object({
+    title: z.string().min(1),
+    blurb: z.string().default(""),
+    includes: z.array(z.string()).default([]),
+    sortOrder: z.number().int().default(0),
+  }),
+  testimonials: z.object({
+    quote: z.string().min(1),
+    author: z.string().default(""),
+    context: z.string().default(""),
+    sortOrder: z.number().int().default(0),
+  }),
+  availability: z.object({
+    date: z.string().min(1),
+    status: z.enum(["AVAILABLE", "TENTATIVE", "BOOKED", "UNAVAILABLE"]).default("AVAILABLE"),
+    note: z.string().nullable().default(null),
+  }),
+} satisfies Record<ResourceName, z.ZodTypeAny>;
+
+const resourceName = z.string().refine(isResourceName, { message: "Unknown resource" });
+
+// ── Content (public read, admin write) ───────────────────────────────────────
+const contentRouter = router({
+  getSite: publicProcedure.query(() => q.getSiteContent()),
+
+  list: adminProcedure
+    .input(z.object({ resource: resourceName }))
+    .query(({ input }) => q.listResource(input.resource as ResourceName)),
+
+  create: adminProcedure
+    .input(z.object({ resource: resourceName, values: z.record(z.string(), z.unknown()) }))
+    .mutation(({ input }) => {
+      const name = input.resource as ResourceName;
+      const parsed = resourceSchemas[name].parse(input.values);
+      return q.createResource(name, parsed as Record<string, unknown>);
+    }),
+
+  update: adminProcedure
+    .input(z.object({ resource: resourceName, id: z.string().min(1), values: z.record(z.string(), z.unknown()) }))
+    .mutation(async ({ input }) => {
+      const name = input.resource as ResourceName;
+      const parsed = resourceSchemas[name].partial().parse(input.values);
+      const row = await q.updateResource(name, input.id, parsed as Record<string, unknown>);
+      if (!row) throw new TRPCError({ code: "NOT_FOUND", message: "That item no longer exists." });
+      return row;
+    }),
+
+  remove: adminProcedure
+    .input(z.object({ resource: resourceName, id: z.string().min(1) }))
+    .mutation(async ({ input }) => {
+      const ok = await q.deleteResource(input.resource as ResourceName, input.id);
+      if (!ok) throw new TRPCError({ code: "NOT_FOUND", message: "That item no longer exists." });
+      return { ok: true };
+    }),
+});
+
+// ── Site settings (single row) ───────────────────────────────────────────────
+const settingsRouter = router({
+  get: adminProcedure.query(() => q.getSettings()),
+
+  update: adminProcedure
+    .input(
+      z.object({
+        artist: z.string().min(1),
+        role: z.string().min(1),
+        tagline: z.string().default(""),
+        shortIntro: z.string().default(""),
+        longIntro: z.string().default(""),
+        email: z.string().default(""),
+        phoneDisplay: z.string().default(""),
+        phoneHref: z.string().default(""),
+        whatsappDisplay: z.string().default(""),
+        whatsapp: z.string().default(""),
+        cities: z.string().default(""),
+        travelNote: z.string().default(""),
+      }),
+    )
+    .mutation(({ input }) => q.upsertSettings(input)),
+});
+
+// ── Enquiries (public create, admin manage) ──────────────────────────────────
+const enquiriesRouter = router({
+  create: publicProcedure
+    .input(
+      z.object({
+        name: z.string().min(1),
+        contact: z.string().min(1),
+        email: z.string().optional(),
+        eventType: z.string().default(""),
+        eventDate: z.string().optional(),
+        city: z.string().default(""),
+        venue: z.string().default(""),
+        message: z.string().optional(),
+      }),
+    )
+    .mutation(({ input }) =>
+      q.createEnquiry({
+        name: input.name,
+        contact: input.contact,
+        email: input.email || null,
+        eventType: input.eventType,
+        eventDate: input.eventDate || null,
+        city: input.city,
+        venue: input.venue,
+        message: input.message || null,
+      }),
+    ),
+
+  list: adminProcedure.query(() => q.listEnquiries()),
+
+  setRead: adminProcedure
+    .input(z.object({ id: z.string().min(1), read: z.boolean() }))
+    .mutation(async ({ input }) => {
+      const row = await q.setEnquiryRead(input.id, input.read);
+      if (!row) throw new TRPCError({ code: "NOT_FOUND", message: "That enquiry no longer exists." });
+      return row;
+    }),
+
+  remove: adminProcedure
+    .input(z.object({ id: z.string().min(1) }))
+    .mutation(async ({ input }) => {
+      const ok = await q.deleteEnquiry(input.id);
+      if (!ok) throw new TRPCError({ code: "NOT_FOUND", message: "That enquiry no longer exists." });
+      return { ok: true };
+    }),
+});
+
+// ── File uploads (admin only) ────────────────────────────────────────────────
+// Three-step protocol: uploadUrl → browser PUT → commit. Admin-only, because the
+// only uploader on this site is the admin adding gallery photos.
 export function sanitizeBasename(name: string): string {
-  // Split on "\\" too: it cannot steer a path segment (the key joins on "/"),
-  // but a Windows path would otherwise fold its directories into the stem.
   const last = name.split(/[/\\]/).pop() ?? "";
-  // `> 0`, not `>= 0`: in ".gitignore" the dot is a dotfile prefix, not an
-  // extension separator, so the whole name is the stem.
   const dot = last.lastIndexOf(".");
   const rawStem = dot > 0 ? last.slice(0, dot) : last;
   const rawExt = dot > 0 ? last.slice(dot + 1) : "";
-  const stem =
-    rawStem.replace(/[^A-Za-z0-9._-]/g, "").replace(/^\.+/, "") || "upload";
-  // No dots or separators in an extension, and capped — the key is
-  // `${uuid}-${basename}`, so a long tail buys nothing.
+  const stem = rawStem.replace(/[^A-Za-z0-9._-]/g, "").replace(/^\.+/, "") || "upload";
   const ext = rawExt.replace(/[^A-Za-z0-9]/g, "").slice(0, 10);
   return ext ? `${stem}.${ext}` : stem;
 }
 
-// Example file-upload router. The three-step protocol matters: the browser PUTs
-// straight to object storage, so the server only learns the upload succeeded when
-// the client calls `commit`. Skipping commit leaves an unindexed orphan object —
-// never a row pointing at nothing.
-//
-//   1. uploadUrl  → signed PUT URL + the key to commit later
-//   2. browser    → PUT the bytes to uploadUrl
-//   3. commit     → index it (size/type are read back from storage)
 const filesRouter = router({
-  uploadUrl: protectedProcedure
+  uploadUrl: adminProcedure
     .input(z.object({ name: z.string().min(1), contentType: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
-      // The uuid prefix makes the key unguessable ONLY if the rest of the key
-      // isn't attacker-controlled — sanitizeBasename strips the client-supplied
-      // `name` down to a safe basename first, so it can't steer path segments
-      // (e.g. "/../report.pdf") into someone else's key.
       const key = `${crypto.randomUUID()}-${sanitizeBasename(input.name)}`;
       try {
         const { uploadUrl, publicPath } = await storagePutUrl(key, input.contentType, {
@@ -120,15 +265,14 @@ const filesRouter = router({
           throw new TRPCError({
             code: "BAD_REQUEST",
             message:
-              "upload rejected by storage — check contentType is on the platform's whitelist " +
-              "(see AGENT.md: png/jpeg/gif/webp/avif, pdf, text/plain, csv, json, mpeg/wav audio, mp4/webm video)",
+              "upload rejected by storage — allowed types: png/jpeg/gif/webp/avif, pdf, text/plain, csv, json, mpeg/wav audio, mp4/webm video",
           });
         }
         throw e;
       }
     }),
 
-  commit: protectedProcedure
+  commit: adminProcedure
     .input(z.object({ key: z.string().min(1), name: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
       try {
@@ -144,9 +288,9 @@ const filesRouter = router({
       }
     }),
 
-  list: protectedProcedure.query(({ ctx }) => storageListByOwner(ctx.user.id)),
+  list: adminProcedure.query(({ ctx }) => storageListByOwner(ctx.user.id)),
 
-  remove: protectedProcedure
+  remove: adminProcedure
     .input(z.object({ key: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
       try {
@@ -162,7 +306,10 @@ const filesRouter = router({
 
 export const appRouter = router({
   auth: authRouter,
-  items: itemsRouter,
+  admin: adminRouter,
+  content: contentRouter,
+  settings: settingsRouter,
+  enquiries: enquiriesRouter,
   files: filesRouter,
 });
 

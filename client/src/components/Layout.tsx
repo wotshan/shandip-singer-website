@@ -3,26 +3,28 @@ import { Link, useLocation } from "wouter";
 import { Menu, X } from "lucide-react";
 import { MailGlyph, PhoneGlyph, SOCIAL_GLYPHS, WhatsAppGlyph } from "./icons";
 import { cn } from "@/lib/utils";
-import { navItems, site, socials } from "@/data/site";
+import { navItems, type SocialKey } from "@/data/site";
+import { useSiteContent } from "@/content/SiteContentProvider";
 
 /* ── Brand mark ─────────────────────────────────────────────────────────── */
 
 function Wordmark({ compact = false }: { compact?: boolean }) {
+  const { settings } = useSiteContent();
   return (
     <Link
       href="/"
-      aria-label={`${site.artist} — home`}
+      aria-label={`${settings.artist} — home`}
       className="group flex items-center gap-3"
     >
       <span
         aria-hidden="true"
         className="grid h-9 w-9 place-items-center rounded-full border border-crimson/40 bg-crimson/10 font-display text-base text-crimson transition-colors group-hover:border-crimson/70 group-hover:bg-crimson/20"
       >
-        S
+        {settings.artist.charAt(0)}
       </span>
       <span className="flex flex-col leading-none">
         <span className="font-display text-lg tracking-[0.16em] text-foreground">
-          {site.artist}
+          {settings.artist}
         </span>
         {!compact ? (
           <span className="mt-1 text-[0.5625rem] font-medium uppercase tracking-[0.26em] text-ink-faint">
@@ -157,6 +159,8 @@ export function Nav() {
 /* ── Footer ─────────────────────────────────────────────────────────────── */
 
 export function Footer() {
+  const { settings, socials } = useSiteContent();
+
   return (
     <footer className="relative border-t border-border-subtle bg-surface-1">
       <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-16">
@@ -164,7 +168,7 @@ export function Footer() {
           <div>
             <Wordmark compact />
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-muted-foreground">
-              {site.shortIntro}
+              {settings.shortIntro}
             </p>
           </div>
 
@@ -189,30 +193,30 @@ export function Footer() {
             <ul className="space-y-2.5">
               <li>
                 <a
-                  href={`mailto:${site.email}`}
-                  aria-label={`Email SHANDIP at ${site.email}`}
+                  href={`mailto:${settings.email}`}
+                  aria-label={`Email ${settings.artist} at ${settings.email}`}
                   className="inline-flex items-center gap-2.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
                 >
                   <MailGlyph className="h-4 w-4 text-crimson" />
-                  {site.email}
+                  {settings.email}
                 </a>
               </li>
               <li>
                 <a
-                  href={site.phoneHref}
-                  aria-label={`Call SHANDIP on ${site.phoneDisplay}`}
+                  href={settings.phoneHref}
+                  aria-label={`Call ${settings.artist} on ${settings.phoneDisplay}`}
                   className="inline-flex items-center gap-2.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
                 >
                   <PhoneGlyph className="h-4 w-4 text-crimson" />
-                  {site.phoneDisplay}
+                  {settings.phoneDisplay}
                 </a>
               </li>
               <li>
                 <a
-                  href={site.whatsapp}
+                  href={settings.whatsapp}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="Message SHANDIP on WhatsApp"
+                  aria-label="Message on WhatsApp"
                   className="inline-flex items-center gap-2.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
                 >
                   <WhatsAppGlyph className="h-4 w-4 text-crimson" />
@@ -226,9 +230,9 @@ export function Footer() {
               {socials
                 .filter((s) => s.external)
                 .map((s) => {
-                  const Icon = SOCIAL_GLYPHS[s.key];
+                  const Icon = SOCIAL_GLYPHS[s.key as SocialKey] ?? SOCIAL_GLYPHS.email;
                   return (
-                    <li key={s.key}>
+                    <li key={s.id}>
                       <a
                         href={s.href}
                         target="_blank"
@@ -248,8 +252,8 @@ export function Footer() {
         <div className="rule my-10" />
 
         <div className="flex flex-col gap-4 text-xs text-ink-faint sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} {site.artist}. All rights reserved.</p>
-          <p>{site.role}</p>
+          <p>© {new Date().getFullYear()} {settings.artist}. All rights reserved.</p>
+          <p>{settings.role}</p>
         </div>
       </div>
     </footer>

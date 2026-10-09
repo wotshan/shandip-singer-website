@@ -5,8 +5,7 @@ import { Reveal } from "@/components/Reveal";
 import { SectionHeading } from "@/components/SectionHeading";
 import { OccasionCard } from "@/components/OccasionCard";
 import { ContactLinks } from "@/components/ContactLinks";
-import { site } from "@/data/site";
-import { occasions } from "@/data/occasions";
+import { useSiteContent } from "@/content/SiteContentProvider";
 
 /** Shared page header for the inner routes — keeps every page's opening identical. */
 export function PageHeader({
@@ -31,18 +30,20 @@ export function PageHeader({
 }
 
 export default function About() {
+  const { settings } = useSiteContent();
+
   return (
     <>
       <PageHeader
         eyebrow="About"
         title="The performer behind the voice"
-        intro={site.shortIntro}
+        intro={settings.shortIntro}
       />
 
       <section className="mx-auto max-w-7xl px-5 py-20 sm:px-8 sm:py-28">
         <div className="grid gap-12 lg:grid-cols-[1.15fr_1fr] lg:gap-20">
           <Reveal className="space-y-6">
-            <p className="text-lg leading-relaxed text-foreground sm:text-xl">{site.longIntro}</p>
+            <p className="text-lg leading-relaxed text-foreground sm:text-xl">{settings.longIntro}</p>
             <p className="text-base leading-relaxed text-muted-foreground">
               The repertoire moves comfortably between Bollywood, retro, romantic ballads,
               acoustic covers and original material — read from the room rather than run off a
@@ -52,7 +53,7 @@ export default function About() {
             <p className="text-base leading-relaxed text-muted-foreground">
               Performances span weddings and receptions, engagement ceremonies, birthdays, private
               celebrations, club nights, corporate events, college festivals and acoustic sessions.
-              {site.travelNote}
+              {settings.travelNote}
             </p>
           </Reveal>
 
@@ -113,6 +114,8 @@ export default function About() {
 }
 
 export function OccasionsPage() {
+  const { occasions } = useSiteContent();
+
   return (
     <>
       <PageHeader

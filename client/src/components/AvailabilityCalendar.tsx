@@ -1,11 +1,6 @@
 import { cn } from "@/lib/utils";
-import {
-  availabilityDays,
-  availabilityMonth,
-  statusMeta,
-  weekdayLabels,
-  type AvailabilityStatus,
-} from "@/data/availability";
+import { useSiteContent } from "@/content/SiteContentProvider";
+import { statusMeta, weekdayLabels, type AvailabilityStatus } from "@/data/availability";
 
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
@@ -15,20 +10,26 @@ const MONTH_NAMES = [
 /**
  * Calendar-style availability preview.
  *
- * Uses a Monday-first grid offset computed from the month's first weekday, so
- * the dates line up under the correct column at any month. Each day carries a
- * text label as well as a colour, so status never depends on colour alone.
+ * Renders the current month from the admin's booking calendar. Uses a
+ * Monday-first grid offset computed from the month's first weekday, so the dates
+ * line up under the correct column at any month. Each day carries a text label
+ * as well as a colour, so status never depends on colour alone.
  */
 export function AvailabilityCalendar() {
-  const { year, month } = availabilityMonth;
+  const { availability } = useSiteContent();
+
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+
   const firstWeekday = new Date(year, month, 1).getDay(); // 0 = Sunday
   // Shift so the week starts on Monday (0=Mon … 6=Sun).
   const leadingBlanks = (firstWeekday + 6) % 7;
 
-  const byDate = new Map(availabilityDays.map((d) => [d.date, d]));
+  const byDate = new Map(availability.map((d) => [d.date, d]));
   const total = new Date(year, month + 1, 0).getDate();
 
-  const cells: Array<{ day: number; status?: AvailabilityStatus; note?: string } | null> = [];
+  const cells: Array<{ day: number; status?: AvailabilityStatus; note?: string | null } | null> = [];
   for (let i = 0; i < leadingBlanks; i += 1) cells.push(null);
   for (let d = 1; d <= total; d += 1) {
     const iso = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
@@ -42,7 +43,7 @@ export function AvailabilityCalendar() {
         <h3 className="font-display text-2xl text-foreground sm:text-3xl">
           {MONTH_NAMES[month]} {year}
         </h3>
-        <span className="text-xs uppercase tracking-[0.16em] text-ink-faint">Preview</span>
+        <span className="text-xs uppercase tracking-[0.16em] text-ink-faint">Live</span>
       </div>
 
       {/* Weekday header */}

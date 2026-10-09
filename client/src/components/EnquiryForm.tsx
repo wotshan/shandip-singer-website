@@ -1,7 +1,8 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { occasions } from "@/data/occasions";
+import { trpc } from "@/_core/trpc";
+import { useSiteContent } from "@/content/SiteContentProvider";
 
 type Values = {
   name: string;
@@ -52,6 +53,9 @@ export function validate(v: Values): Errors {
 }
 
 export function EnquiryForm() {
+  const { occasions } = useSiteContent();
+  const createM = trpc.enquiries.create.useMutation();
+
   const [values, setValues] = useState<Values>(EMPTY);
   const [errors, setErrors] = useState<Errors>({});
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
@@ -76,12 +80,21 @@ export function EnquiryForm() {
     }
 
     setStatus("submitting");
-
-    // No backend is connected yet. This simulates the round-trip so the
-    // success state is real and testable — it does NOT send anything anywhere,
-    // and the confirmation copy says so explicitly.
-    await new Promise((r) => window.setTimeout(r, 700));
-    setStatus("success");
+    try {
+      await createM.mutateAsync({
+        name: values.name.trim(),
+        contact: values.contact.trim(),
+        email: values.email.trim() || undefined,
+        eventType: values.eventType,
+        eventDate: values.eventDate || undefined,
+        city: values.city.trim(),
+        venue: values.venue.trim(),
+        message: values.message.trim() || undefined,
+      });
+      setStatus("success");
+    } catch {
+      setStatus("error");
+    }
   }
 
   function reset() {
@@ -105,36 +118,9 @@ export function EnquiryForm() {
         <CheckCircle2 className="mx-auto h-12 w-12 text-emerald-400" aria-hidden="true" />
         <h3 className="mt-5 font-display text-3xl text-foreground">Enquiry received</h3>
         <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-muted-foreground">
-          Thanks, {values.name.split(" ")[0] || "there"} — your enquiry has been captured and shown
-          back to you below.
+          Thanks, {values.name.split(" ")[0] || "there"} — your enquiry has been sent and will be
+          read personally before a date is confirmed.
         </p>
-        <p className="mx-auto mt-4 max-w-md rounded-xl border border-border-subtle bg-surface-1 px-4 py-3 text-xs leading-relaxed text-ink-faint">
-          <strong className="text-muted-foreground">Demo note:</strong> this form is not yet
-          connected to a booking inbox, so nothing has been sent to SHANDIP. Once an enquiry
-          channel is wired up, submissions will reach the artist directly.
-        </p>
-        <div className="mx-auto mt-6 max-w-md rounded-2xl border border-border-subtle bg-surface-1 p-5 text-left">
-          <p className="eyebrow mb-3">Your submission</p>
-          <dl className="space-y-1.5 text-xs">
-            {(
-              [
-                ["Name", values.name],
-                ["Contact", values.contact],
-                ["Email", values.email || "—"],
-                ["Event type", values.eventType],
-                ["Date", values.eventDate || "—"],
-                ["City", values.city],
-                ["Venue", values.venue],
-                ["Message", values.message || "—"],
-              ] as const
-            ).map(([label, val]) => (
-              <div key={label} className="flex gap-3">
-                <dt className="w-24 shrink-0 text-ink-faint">{label}</dt>
-                <dd className="text-muted-foreground">{val}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
         <button
           type="button"
           onClick={reset}
@@ -284,8 +270,8 @@ export function EnquiryForm() {
 
       <div className="mt-7 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs leading-relaxed text-ink-faint sm:max-w-xs">
-          Fields marked <span className="text-crimson">*</span> are required. The form validates in
-          your browser and is not yet connected to a booking inbox.
+          Fields marked <span className="text-crimson">*</span> are required. Your enquiry goes
+          straight to the booking inbox.
         </p>
 
         <button

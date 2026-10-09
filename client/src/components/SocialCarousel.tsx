@@ -1,6 +1,8 @@
 import type { CSSProperties } from "react";
 import { SOCIAL_GLYPHS } from "./icons";
-import { socials, type Social } from "@/data/site";
+import { useSiteContent } from "@/content/SiteContentProvider";
+import type { SocialKey } from "@/data/site";
+import type { SocialLink } from "@shared/types";
 
 /**
  * Seamless, dark-faded loop of the artist's social channels.
@@ -19,8 +21,8 @@ import { socials, type Social } from "@/data/site";
 
 const DURATION = "38s";
 
-function Channel({ social, duplicate = false }: { social: Social; duplicate?: boolean }) {
-  const Icon = SOCIAL_GLYPHS[social.key];
+function Channel({ social, duplicate = false }: { social: SocialLink; duplicate?: boolean }) {
+  const Icon = SOCIAL_GLYPHS[social.key as SocialKey] ?? SOCIAL_GLYPHS.email;
   return (
     <li className={duplicate ? "social-dup shrink-0" : "shrink-0"}>
       <a
@@ -38,6 +40,8 @@ function Channel({ social, duplicate = false }: { social: Social; duplicate?: bo
 }
 
 export function SocialCarousel() {
+  const { socials } = useSiteContent();
+
   return (
     <div className="social-marquee edge-fade relative overflow-hidden py-2">
       <ul
@@ -45,10 +49,10 @@ export function SocialCarousel() {
         style={{ "--marquee-duration": DURATION } as CSSProperties}
       >
         {socials.map((s) => (
-          <Channel key={s.key} social={s} />
+          <Channel key={s.id} social={s} />
         ))}
         {socials.map((s) => (
-          <Channel key={`dup-${s.key}`} social={s} duplicate />
+          <Channel key={`dup-${s.id}`} social={s} duplicate />
         ))}
       </ul>
     </div>

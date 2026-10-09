@@ -2,11 +2,12 @@ import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
 import { EventCard } from "@/components/EventCard";
-import { SampleNotice } from "@/components/SampleNotice";
 import { PageHeader } from "./About";
-import { upcomingEvents, eventsAreSample } from "@/data/events";
+import { useSiteContent } from "@/content/SiteContentProvider";
 
 export default function Events() {
+  const { events } = useSiteContent();
+
   return (
     <>
       <PageHeader
@@ -16,23 +17,25 @@ export default function Events() {
       />
 
       <section className="mx-auto max-w-7xl px-5 py-20 sm:px-8 sm:py-28">
-        {eventsAreSample ? (
+        {events.length === 0 ? (
           <Reveal>
-            <SampleNotice>
-              Everything on this page is <strong className="text-foreground">sample demo
-              content</strong> shown to illustrate the layout. These are not real confirmed
-              bookings, and none of these dates should be treated as an actual gig.
-            </SampleNotice>
+            <div className="rounded-3xl border border-dashed border-border-strong bg-surface-2 p-12 text-center">
+              <p className="font-display text-2xl text-foreground">No dates announced yet</p>
+              <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">
+                Confirmed performances will be listed here as soon as they are locked in. Send an
+                enquiry for your own date in the meantime.
+              </p>
+            </div>
           </Reveal>
-        ) : null}
-
-        <div className="mt-10 grid gap-4 lg:grid-cols-2">
-          {upcomingEvents.map((event, i) => (
-            <Reveal key={event.id} delay={((i % 2) + 1) as 1 | 2}>
-              <EventCard event={event} />
-            </Reveal>
-          ))}
-        </div>
+        ) : (
+          <div className="grid gap-4 lg:grid-cols-2">
+            {events.map((event, i) => (
+              <Reveal key={event.id} delay={((i % 2) + 1) as 1 | 2}>
+                <EventCard event={event} />
+              </Reveal>
+            ))}
+          </div>
+        )}
 
         <Reveal className="mt-14">
           <div className="flex flex-col gap-8 rounded-3xl border border-border-subtle bg-surface-2 p-8 sm:p-10 lg:flex-row lg:items-center lg:justify-between">

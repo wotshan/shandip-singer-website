@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Maximize2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Lightbox } from "./Lightbox";
-import type { GalleryItem } from "@/data/gallery";
+import type { GalleryItem } from "@shared/types";
 
 /**
  * Photo wall.
@@ -11,9 +11,7 @@ import type { GalleryItem } from "@/data/gallery";
  * reachable and announces itself as "Open photo N of M: <caption>".
  *
  * The images keep their natural aspect ratio instead of being forced into one
- * uniform box: all three photographs are portrait with different proportions
- * (0.71 / 0.66 / 0.56), so a shared aspect ratio would either crop the narrower
- * frames hard or letterbox them. `h-auto` never crops a subject.
+ * uniform box, so a shared aspect ratio never crops a subject.
  */
 export function GalleryGrid({
   items,
@@ -61,9 +59,11 @@ export function GalleryGrid({
                 className="pointer-events-none absolute inset-0 bg-crimson/0 transition-colors duration-500 group-hover:bg-crimson/15"
               />
 
-              <span className="absolute left-3 top-3 rounded-full border border-white/15 bg-black/45 px-2.5 py-1 text-[0.5625rem] font-semibold uppercase tracking-[0.16em] text-white/85 backdrop-blur-sm">
-                {item.tag}
-              </span>
+              {item.tag ? (
+                <span className="absolute left-3 top-3 rounded-full border border-white/15 bg-black/45 px-2.5 py-1 text-[0.5625rem] font-semibold uppercase tracking-[0.16em] text-white/85 backdrop-blur-sm">
+                  {item.tag}
+                </span>
+              ) : null}
 
               <span
                 aria-hidden="true"

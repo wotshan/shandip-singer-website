@@ -1,59 +1,13 @@
-// SAMPLE AVAILABILITY DATA — demo only, resets on reload.
-// This is a preview of how the calendar reads. It is NOT connected to any
-// booking system, so treat every status as illustrative.
+// Fallback availability \u2014 deliberately EMPTY.
+//
+// The booking calendar is the admin's own data (seeded as the next 90 days
+// AVAILABLE, then edited from the dashboard). With no data the calendar renders
+// an honest "no dates published" state rather than a fabricated pattern.
+import type { AvailabilityDay, AvailabilityStatus } from "@shared/types";
 
-export type AvailabilityStatus = "AVAILABLE" | "TENTATIVE" | "BOOKED" | "UNAVAILABLE";
+export type { AvailabilityStatus };
 
-export type AvailabilityDay = {
-  /** ISO date (YYYY-MM-DD). */
-  date: string;
-  status: AvailabilityStatus;
-  note?: string;
-};
-
-export const availabilityIsSample = true;
-
-/** Month the preview renders — a fixed reference month so the grid is stable. */
-export const availabilityMonth = { year: 2026, month: 11 }; // December 2026 (0-indexed)
-
-/** Build a stable demo pattern: weekends busy, a few midweek open slots. */
-function buildMonth(year: number, month: number): AvailabilityDay[] {
-  const days: AvailabilityDay[] = [];
-  const total = new Date(year, month + 1, 0).getDate();
-
-  for (let d = 1; d <= total; d += 1) {
-    const date = new Date(year, month, d);
-    const iso = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-    const dow = date.getDay(); // 0 = Sunday
-
-    let status: AvailabilityStatus;
-    let note: string | undefined;
-
-    if (dow === 6) {
-      status = "BOOKED";
-      note = "Evening performance";
-    } else if (dow === 0) {
-      status = "TENTATIVE";
-      note = "Holding for a wedding";
-    } else if (d % 7 === 3) {
-      status = "UNAVAILABLE";
-      note = "Travelling";
-    } else if (d % 5 === 0) {
-      status = "TENTATIVE";
-    } else {
-      status = "AVAILABLE";
-    }
-
-    days.push({ date: iso, status, note });
-  }
-
-  return days;
-}
-
-export const availabilityDays: AvailabilityDay[] = buildMonth(
-  availabilityMonth.year,
-  availabilityMonth.month,
-);
+export const fallbackAvailability: AvailabilityDay[] = [];
 
 export const statusMeta: Record<
   AvailabilityStatus,
@@ -67,7 +21,7 @@ export const statusMeta: Record<
   },
   TENTATIVE: {
     label: "Tentative",
-    description: "An enquiry is being discussed — get in touch early.",
+    description: "An enquiry is being discussed \u2014 get in touch early.",
     dotClass: "bg-amber-400",
     chipClass: "border-amber-400/30 bg-amber-400/10 text-amber-300",
   },

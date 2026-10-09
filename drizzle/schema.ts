@@ -1,4 +1,14 @@
-import { pgTable, uuid, text, timestamp, index, bigint } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  uuid,
+  text,
+  timestamp,
+  index,
+  bigint,
+  integer,
+  boolean,
+  jsonb,
+} from "drizzle-orm/pg-core";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SYSTEM TABLE — managed by the scaffold. The Agent MUST NOT redefine or drop
@@ -53,21 +63,152 @@ export const files = pgTable(
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
-// BUSINESS TABLES — the Agent writes these. Example below shows the expected
-// pattern: FK to users.id, timestamps, an index on the owner column. Replace
-// with the app's real domain, then `pnpm db:generate` to emit a migration.
+// BUSINESS TABLES — SHANDIP site content, all editable from the admin dashboard.
+//
+// Every table below is a single-tenant content store: the site has exactly one
+// owner (the admin), so rows are NOT owner-scoped — they are the site's content.
+// Writes are gated by `adminProcedure` (role === 'admin'), reads are public.
+//
+// `sortOrder` is the admin-controlled display order (ascending). `id` is a uuid
+// so the admin UI can address a row without knowing its position.
 // ─────────────────────────────────────────────────────────────────────────────
-export const items = pgTable(
-  "items",
+
+/** Single-row table (id = 'main') holding the artist's scalar profile + copy. */
+export const siteSettings = pgTable("site_settings", {
+  id: text("id").primaryKey().default("main"),
+  artist: text("artist").notNull().default("SHANDIP"),
+  role: text("role").notNull().default("Professional Singer & Live Performer"),
+  tagline: text("tagline").notNull().default(""),
+  shortIntro: text("short_intro").notNull().default(""),
+  longIntro: text("long_intro").notNull().default(""),
+  email: text("email").notNull().default(""),
+  phoneDisplay: text("phone_display").notNull().default(""),
+  phoneHref: text("phone_href").notNull().default(""),
+  whatsappDisplay: text("whatsapp_display").notNull().default(""),
+  whatsapp: text("whatsapp").notNull().default(""),
+  cities: text("cities").notNull().default(""),
+  travelNote: text("travel_note").notNull().default(""),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** Social / contact channels — drives the contact rows, footer icons and carousel. */
+export const socialLinks = pgTable(
+  "social_links",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    ownerId: uuid("owner_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+    key: text("key").notNull(),          // whatsapp | instagram | linktree | discord | linkedin | facebook | email | phone
+    label: text("label").notNull(),
+    value: text("value").notNull(),
+    href: text("href").notNull(),
+    handle: text("handle").notNull(),    // spoken label for icon-only contexts
+    external: boolean("external").notNull().default(true),
+    sortOrder: integer("sort_order").notNull().default(0),
+  },
+  (t) => [index("social_links_order_idx").on(t.sortOrder)],
+);
+
+/** Performance gallery. `src` is a local /images/... path or an /app-storage/... key. */
+export const galleryItems = pgTable(
+  "gallery_items",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    src: text("src").notNull(),
+    width: integer("width").notNull().default(1200),
+    height: integer("height").notNull().default(1600),
+    caption: text("caption").notNull().default(""),
+    tag: text("tag").notNull().default(""),
+    alt: text("alt").notNull().default(""),
+    sortOrder: integer("sort_order").notNull().default(0),
+  },
+  (t) => [index("gallery_items_order_idx").on(t.sortOrder)],
+);
+
+/** Upcoming performances. Only real, confirmed dates belong here. */
+export const events = pgTable(
+  "events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
     title: text("title").notNull(),
-    notes: text("notes"),
-    coverUrl: text("cover_url"), // e.g. an /app-storage/... key (DESIGN §5.6)
+    date: text("date").notNull(),        // ISO YYYY-MM-DD
+    time: text("time").notNull().default(""),
+    venue: text("venue").notNull().default(""),
+    city: text("city").notNull().default(""),
+    status: text("status").notNull().default("Confirmed"), // Confirmed | On Hold
+    note: text("note"),
+    sortOrder: integer("sort_order").notNull().default(0),
+  },
+  (t) => [index("events_order_idx").on(t.sortOrder)],
+);
+
+/** Repertoire / set types the artist performs. */
+export const musicItems = pgTable(
+  "music_items",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    title: text("title").notNull(),
+    category: text("category").notNull().default(""),
+    blurb: text("blurb").notNull().default(""),
+    href: text("href"),                  // optional real streaming link
+    linkLabel: text("link_label"),       // optional label for that link
+    duration: text("duration"),          // optional
+    sortOrder: integer("sort_order").notNull().default(0),
+  },
+  (t) => [index("music_items_order_idx").on(t.sortOrder)],
+);
+
+/** Occasions / services the artist performs at. */
+export const occasions = pgTable(
+  "occasions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    title: text("title").notNull(),
+    blurb: text("blurb").notNull().default(""),
+    includes: jsonb("includes").$type<string[]>().notNull().default([]),
+    sortOrder: integer("sort_order").notNull().default(0),
+  },
+  (t) => [index("occasions_order_idx").on(t.sortOrder)],
+);
+
+/** Client testimonials — only genuine, permitted quotes belong here. */
+export const testimonials = pgTable(
+  "testimonials",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    quote: text("quote").notNull(),
+    author: text("author").notNull().default(""),
+    context: text("context").notNull().default(""),
+    sortOrder: integer("sort_order").notNull().default(0),
+  },
+  (t) => [index("testimonials_order_idx").on(t.sortOrder)],
+);
+
+/** Booking-calendar status per date. */
+export const availabilityDays = pgTable(
+  "availability_days",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    date: text("date").notNull().unique(), // ISO YYYY-MM-DD
+    status: text("status").notNull().default("AVAILABLE"), // AVAILABLE | TENTATIVE | BOOKED | UNAVAILABLE
+    note: text("note"),
+  },
+  (t) => [index("availability_days_date_idx").on(t.date)],
+);
+
+/** Enquiries submitted from the public contact form. */
+export const enquiries = pgTable(
+  "enquiries",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull(),
+    contact: text("contact").notNull(),
+    email: text("email"),
+    eventType: text("event_type").notNull().default(""),
+    eventDate: text("event_date"),
+    city: text("city").notNull().default(""),
+    venue: text("venue").notNull().default(""),
+    message: text("message"),
+    read: boolean("read").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index("items_owner_idx").on(t.ownerId)],
+  (t) => [index("enquiries_created_idx").on(t.createdAt)],
 );

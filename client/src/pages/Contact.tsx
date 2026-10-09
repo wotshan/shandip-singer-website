@@ -5,9 +5,11 @@ import { EnquiryForm } from "@/components/EnquiryForm";
 import { ContactLinks } from "@/components/ContactLinks";
 import { SocialCarousel } from "@/components/SocialCarousel";
 import { PageHeader } from "./About";
-import { site } from "@/data/site";
+import { useSiteContent } from "@/content/SiteContentProvider";
 
 export default function Contact() {
+  const { settings } = useSiteContent();
+
   return (
     <>
       <PageHeader
@@ -32,34 +34,34 @@ export default function Contact() {
               <ul className="space-y-3 text-sm">
                 <li>
                   <a
-                    href={`mailto:${site.email}`}
-                    aria-label={`Email SHANDIP at ${site.email}`}
+                    href={`mailto:${settings.email}`}
+                    aria-label={`Email ${settings.artist} at ${settings.email}`}
                     className="inline-flex items-center gap-3 text-muted-foreground transition-colors hover:text-foreground"
                   >
                     <MailGlyph className="h-4 w-4 text-crimson" />
-                    {site.email}
+                    {settings.email}
                   </a>
                 </li>
                 <li>
                   <a
-                    href={site.phoneHref}
-                    aria-label={`Call SHANDIP on ${site.phoneDisplay}`}
+                    href={settings.phoneHref}
+                    aria-label={`Call ${settings.artist} on ${settings.phoneDisplay}`}
                     className="inline-flex items-center gap-3 text-muted-foreground transition-colors hover:text-foreground"
                   >
                     <PhoneGlyph className="h-4 w-4 text-crimson" />
-                    {site.phoneDisplay}
+                    {settings.phoneDisplay}
                   </a>
                 </li>
                 <li>
                   <a
-                    href={site.whatsapp}
+                    href={settings.whatsapp}
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label="Message SHANDIP on WhatsApp"
+                    aria-label="Message on WhatsApp"
                     className="inline-flex items-center gap-3 text-muted-foreground transition-colors hover:text-foreground"
                   >
                     <WhatsAppGlyph className="h-4 w-4 text-crimson" />
-                    {site.whatsappDisplay}
+                    {settings.whatsappDisplay}
                   </a>
                 </li>
               </ul>
@@ -67,8 +69,8 @@ export default function Contact() {
 
             <div className="rounded-2xl border border-border-subtle bg-surface-1 p-6">
               <p className="eyebrow mb-3">Based in</p>
-              <p className="text-sm text-muted-foreground">{site.cities}</p>
-              <p className="mt-2 text-xs text-ink-faint">{site.travelNote}</p>
+              <p className="text-sm text-muted-foreground">{settings.cities}</p>
+              <p className="mt-2 text-xs text-ink-faint">{settings.travelNote}</p>
             </div>
           </Reveal>
 
@@ -79,9 +81,9 @@ export default function Contact() {
         </div>
       </section>
 
-      {/* ── Social carousel ─────────────────────────────────────────────────── */}
+      {/* ── Social carousel ───────────────────────────────────────────────── */}
       <section
-        aria-label="Follow SHANDIP"
+        aria-label={`Follow ${settings.artist}`}
         className="border-t border-border-subtle bg-surface-1 py-14 sm:py-20"
       >
         <Reveal>

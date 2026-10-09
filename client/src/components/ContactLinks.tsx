@@ -1,18 +1,21 @@
 import { SOCIAL_GLYPHS } from "./icons";
-import { socials } from "@/data/site";
+import { useSiteContent } from "@/content/SiteContentProvider";
+import type { SocialKey } from "@/data/site";
 
 /**
- * The direct-channel rows. Every entry comes from the `socials` registry, so
- * the real accounts live in exactly one place (`data/site.ts`) and this list
- * can never drift out of sync with the footer or the carousel.
+ * The direct-channel rows. Every entry comes from the server's `socials`
+ * registry (admin-editable), so the real accounts live in exactly one place and
+ * this list can never drift out of sync with the footer or the carousel.
  */
 export function ContactLinks() {
+  const { socials } = useSiteContent();
+
   return (
     <ul className="grid gap-3 sm:grid-cols-2">
       {socials.map((s) => {
-        const Icon = SOCIAL_GLYPHS[s.key];
+        const Icon = SOCIAL_GLYPHS[s.key as SocialKey] ?? SOCIAL_GLYPHS.email;
         return (
-          <li key={s.key}>
+          <li key={s.id}>
             <a
               href={s.href}
               {...(s.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
