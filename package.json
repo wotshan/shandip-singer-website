@@ -45,7 +45,6 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "4.3.3",
-    "@vercel/node": "^23.0.1",
     "@types/node": "24.13.3",
     "@types/pg": "8.20.0",
     "@types/react": "19.2.17",
