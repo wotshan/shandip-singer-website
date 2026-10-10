@@ -38,7 +38,7 @@ export function NewsletterSignup() {
         <Reveal variant="scale">
           <div className="relative overflow-hidden rounded-3xl border border-border-subtle bg-surface-2 px-6 py-14 sm:px-12 sm:py-16">
             <div aria-hidden="true" className="ambience absolute inset-0 opacity-50" />
-            <div aria-hidden="true" className="grid-dots absolute inset-0 opacity-60" />
+            <div aria-hidden="true" className="spot absolute inset-0 opacity-60" />
             <div className="relative grid gap-10 lg:grid-cols-[1.1fr_1fr] lg:items-center">
               <div>
                 <p className="eyebrow mb-4">Fan club</p>

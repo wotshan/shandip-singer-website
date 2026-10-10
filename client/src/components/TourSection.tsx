@@ -41,7 +41,7 @@ export function TourSection() {
 
   return (
     <section id="tour" className="relative overflow-hidden border-t border-border-subtle bg-surface-1">
-      <div aria-hidden="true" className="grid-wires absolute inset-0 opacity-60 mask-fade-edges" />
+      <div aria-hidden="true" className="spot absolute inset-0 opacity-60 mask-fade-edges" />
 
       <div className="relative mx-auto max-w-7xl px-5 py-20 sm:px-8 sm:py-28">
         <Reveal>
@@ -56,7 +56,7 @@ export function TourSection() {
         <div className="mt-12">
           {events.length === 0 ? (
             <div className="relative overflow-hidden rounded-3xl border border-dashed border-border-strong bg-surface-1/60 p-10 text-center">
-              <div aria-hidden="true" className="grid-dots absolute inset-0 opacity-60" />
+              <div aria-hidden="true" className="spot absolute inset-0 opacity-60" />
               <div className="relative">
                 <span className="mx-auto grid h-12 w-12 place-items-center rounded-full border border-crimson/35 text-crimson led-bloom">
                   <CalendarDays className="h-5 w-5" aria-hidden="true" />

@@ -84,7 +84,7 @@ export function MusicPlayer() {
         {heading}
         <Reveal delay={1} className="mt-10">
           <div className="relative overflow-hidden rounded-3xl border border-dashed border-border-strong bg-surface-1/60 p-10 text-center backdrop-blur-sm">
-            <div aria-hidden="true" className="grid-dots absolute inset-0 opacity-60" />
+            <div aria-hidden="true" className="spot absolute inset-0 opacity-60" />
             <div className="relative">
               <span className="mx-auto grid h-12 w-12 place-items-center rounded-full border border-crimson/35 text-crimson led-bloom">
                 <Music2 className="h-5 w-5" aria-hidden="true" />
@@ -115,7 +115,7 @@ export function MusicPlayer() {
           {/* Now playing */}
           <TiltCard intensity={3} className="relative overflow-hidden rounded-3xl border border-glass-border bg-surface-1/70 p-6 backdrop-blur-xl sm:p-8">
             <div aria-hidden="true" className="ambience absolute inset-0 opacity-50" />
-            <div aria-hidden="true" className="grid-dots absolute inset-0 opacity-50" />
+            <div aria-hidden="true" className="spot absolute inset-0 opacity-50" />
 
             <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center">
               <div className="relative h-40 w-40 shrink-0 overflow-hidden rounded-2xl border border-glass-border bg-surface-3">

@@ -278,11 +278,47 @@
 }
 
 /* Nothing-style wire grid. */
-.grid-wires {
+/*
+  Dark metallic backdrop — replaces the dot-matrix / wire-grid textures.
+
+  Deep black at the top bleeding to dark charcoal and brushed steel at the
+  bottom, warmed by a faint crimson bloom, overlaid with one very low-opacity
+  105° sheen that reads as a brushed-metal highlight. Each layer is a static
+  gradient, so it costs a single composite and never repaints on scroll.
+*/
+.bg-metallic {
+  background-color: var(--background);
   background-image:
-    linear-gradient(var(--grid-ink) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-ink) 1px, transparent 1px);
-  background-size: 72px 72px;
+    radial-gradient(120% 78% at 50% -12%, hsl(0 0% 15% / 0.5), transparent 58%),
+    linear-gradient(180deg, hsl(0 0% 3.4%) 0%, hsl(0 0% 7.2%) 45%, hsl(0 0% 10.6%) 100%),
+    linear-gradient(105deg, transparent 38%, hsl(0 0% 100% / 0.035) 50%, transparent 62%),
+    radial-gradient(78% 56% at 50% 108%, hsl(357 58% 20% / 0.14), transparent 70%);
+  background-repeat: no-repeat;
+}
+/* Soft metallic highlight for the hero — one static gradient, GPU-cheap. */
+.hero-sheen {
+  background-image:
+    radial-gradient(90% 65% at 50% -8%, hsl(0 0% 100% / 0.055), transparent 62%),
+    linear-gradient(105deg, transparent 42%, hsl(0 0% 100% / 0.03) 50%, transparent 58%);
+  background-repeat: no-repeat;
+}
+
+/* Faint brushed-steel sheen that replaces the old dot-matrix on dark panels. */
+.spot {
+  background-image:
+    radial-gradient(70% 60% at 28% 18%, hsl(0 0% 100% / 0.032), transparent 65%),
+    radial-gradient(60% 50% at 82% 92%, hsl(0 0% 100% / 0.02), transparent 70%);
+  background-repeat: no-repeat;
+}
+
+.light .bg-metallic {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(120% 78% at 50% -12%, hsl(0 0% 100% / 0.85), transparent 58%),
+    linear-gradient(180deg, hsl(0 0% 99%) 0%, hsl(0 0% 96.5%) 45%, hsl(0 0% 93.5%) 100%),
+    linear-gradient(105deg, transparent 38%, hsl(0 0% 0% / 0.028) 50%, transparent 62%),
+    radial-gradient(78% 56% at 50% 108%, hsl(357 42% 60% / 0.08), transparent 70%);
+  background-repeat: no-repeat;
 }
 
 /* Radial mask so a backdrop fades out instead of ending on a hard edge. */
@@ -772,7 +808,26 @@
   from { opacity: 0; transform: translate3d(0, 4px, 0); }
   to   { opacity: 1; transform: none; }
 }
-.tooltip-pop { animation: tooltip-in 0.18s ease-out both; }
+/*
+  Reveal only — NOT `both`. A fill-mode of `both` keeps the final keyframe
+  (opacity: 1) applied forever, which silently overrides Tailwind's `opacity-0`
+  and pins every tooltip permanently visible (31 ghost boxes over the month
+  grid). `backwards` holds the hidden state during the delay and then lets the
+  element's own opacity-0 / group-hover:opacity-100 utilities take over.
+*/
+.tooltip-pop { animation: tooltip-in 0.18s ease-out backwards; }
+
+/*
+  Reveal on hover / keyboard focus. Written explicitly rather than as
+  `group-hover:opacity-100` because Tailwind wraps that variant in
+  `@media (hover: hover)`, so the detail would never appear on a device that
+  reports no hover capability (touch, kiosk, headless). This rule has no media
+  guard, so hover, focus and touch-hold all reveal the tooltip on every device.
+*/
+.group:hover .tooltip-pop,
+.group:focus-visible .tooltip-pop {
+  opacity: 1;
+}
 
 /* PIN entry — a pressed digit pops. */
 @keyframes pin-pop {

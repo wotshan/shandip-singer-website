@@ -157,7 +157,7 @@ export function BookingDrawer() {
             className="drawer-panel relative flex max-h-[92svh] w-full flex-col overflow-y-auto rounded-t-3xl border border-glass-border bg-background/95 p-6 backdrop-blur-2xl sm:max-h-none sm:w-[26rem] sm:rounded-none sm:rounded-l-3xl sm:border-y-0 sm:border-r-0 sm:p-8"
           >
             <div aria-hidden="true" className="absolute inset-0 -z-10">
-              <div className="grid-dots absolute inset-0 opacity-60" />
+              <div className="spot absolute inset-0 opacity-60" />
             </div>
 
             <div className="flex items-start justify-between gap-4">

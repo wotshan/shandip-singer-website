@@ -5,7 +5,6 @@ import { PressMentionsStrip } from "./PressMentionsStrip";
 import { Spotlight } from "./Spotlight";
 import { Waveform } from "./Waveform";
 import { StatusDot } from "./StatusDot";
-import { GridBackdrop } from "./GridBackdrop";
 
 /**
  * Hero.
@@ -45,8 +44,8 @@ export function Hero() {
       />
       <div aria-hidden="true" className="ambience absolute inset-0 -z-10 opacity-75" />
 
-      {/* Nothing-OS dot matrix, masked out at the edges */}
-      <GridBackdrop variant="dots" accent className="-z-10 opacity-70" />
+      {/* A single soft metallic highlight falls across the top of the stage */}
+      <div aria-hidden="true" className="hero-sheen absolute inset-0 -z-10" />
 
       {/* Slow stage spotlight + cursor-follow glow */}
       <div aria-hidden="true" className="hero-spotlight absolute inset-0 -z-10" />

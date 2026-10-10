@@ -8,7 +8,6 @@ import { useSiteContent } from "@/content/SiteContentProvider";
 import { ScrollProgress } from "./ScrollProgress";
 import { BookingDrawer } from "./BookingDrawer";
 import { StatusDot } from "./StatusDot";
-import { GridBackdrop } from "./GridBackdrop";
 
 /* ── Brand mark ─────────────────────────────────────────────────────────────── */
 
@@ -192,7 +191,6 @@ export function Footer() {
 
   return (
     <footer className="relative overflow-hidden border-t border-border-subtle bg-surface-0">
-      <GridBackdrop variant="wires" />
 
       <div className="relative mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-20">
         <div className="grid gap-12 md:grid-cols-[1.5fr_1fr_1fr]">
@@ -322,7 +320,7 @@ export function Footer() {
 
 export function Layout({ children }: { children: ReactNode }) {
   return (
-    <div className="relative flex min-h-dvh flex-col bg-background">
+    <div className="bg-metallic relative flex min-h-dvh flex-col">
       <ScrollProgress />
       <Nav />
       <main className="flex-1 pt-16 sm:pt-20">{children}</main>

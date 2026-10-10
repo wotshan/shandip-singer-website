@@ -3,7 +3,6 @@ import { useLocation } from "wouter";
 import { AlertCircle, Loader2, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/_core/useAuth";
 import { StatusDot } from "@/components/StatusDot";
-import { GridBackdrop } from "@/components/GridBackdrop";
 
 /**
  * The single admin sign-in — a Nothing-OS access dialog.
@@ -48,13 +47,12 @@ export default function AdminLogin() {
 
   return (
     <section className="relative flex min-h-[82svh] items-center justify-center overflow-hidden px-5 py-20">
-      <div aria-hidden="true" className="ambience absolute inset-0 opacity-60" />
       {/*
         No accent LEDs on this page: the access panel is frosted glass, and a
         bright LED sitting behind it bleeds through as a stray dot floating in
-        the card. The dot matrix alone carries the texture.
+        the card. The metallic sheen alone carries the texture.
       */}
-      <GridBackdrop variant="dots" className="-z-10" />
+      <div aria-hidden="true" className="hero-sheen absolute inset-0 opacity-70" />
 
       <div className="relative w-full max-w-md">
         <div

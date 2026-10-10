@@ -144,7 +144,7 @@ export function VideoGrid(
                 />
               ) : (
                 <span className="flex aspect-[4/5] w-full items-center justify-center bg-surface-3">
-                  <span className="grid-dots absolute inset-0 opacity-70" aria-hidden="true" />
+                  <span className="spot absolute inset-0 opacity-70" aria-hidden="true" />
                 </span>
               )}
 

@@ -75,7 +75,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="relative isolate mx-auto max-w-7xl overflow-hidden px-5 py-12 sm:px-8 sm:py-16">
-      <div aria-hidden="true" className="grid-dots pointer-events-none absolute inset-0 -z-10 opacity-50 mask-fade-edges" />
 
       <header className="flex flex-wrap items-start justify-between gap-4 border-b border-border-subtle pb-8">
         <div>

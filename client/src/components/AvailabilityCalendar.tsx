@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 import { useSiteContent } from "@/content/SiteContentProvider";
 import { statusMeta, type AvailabilityStatus } from "@/data/availability";
 import { StatusDot } from "./StatusDot";
-import { GridBackdrop } from "./GridBackdrop";
 
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
@@ -77,9 +76,11 @@ export function AvailabilityCalendar() {
   const documented = Object.values(counts).reduce((a, b) => a + b, 0);
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-glass-border bg-surface-1/80 backdrop-blur-xl">
-      <GridBackdrop variant="dots" fade={false} className="opacity-70" />
-
+    <div className="relative rounded-3xl border border-glass-border bg-surface-1/80 backdrop-blur-xl">
+      {/*
+        No overflow-hidden here: the day tooltips sit above the grid, and a
+        clipping ancestor was cutting them off at the panel's top edge.
+      */}
       <div className="relative p-5 sm:p-7">
         {/* Header: month nav + live tag */}
         <div className="flex items-center justify-between gap-4">

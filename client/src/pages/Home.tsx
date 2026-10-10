@@ -3,7 +3,6 @@ import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
 import { Hero } from "@/components/Hero";
 import { Ticker } from "@/components/Ticker";
-import { GridBackdrop } from "@/components/GridBackdrop";
 import { Reveal } from "@/components/Reveal";
 import { SectionHeading } from "@/components/SectionHeading";
 import { MusicCard } from "@/components/MusicCard";
@@ -31,25 +30,21 @@ import { useSiteContent } from "@/content/SiteContentProvider";
 /**
  * Shared section shell.
  *
- * Optional `backdrop` lays the Nothing-OS dot matrix or wire grid behind a
- * section. The backdrop is always decorative and masked at the edges, so it
- * never fights the type or ends on a hard line.
+ * Sections sit directly on the site-wide metallic backdrop; they carry no
+ * per-section pattern of their own.
  */
 function Section({
   id,
   children,
   className = "",
-  backdrop,
 }: {
   id?: string;
   children: ReactNode;
   className?: string;
-  backdrop?: "dots" | "wires";
 }) {
   return (
     <section id={id} className={`relative isolate overflow-hidden ${className}`}>
-      {backdrop ? <GridBackdrop variant={backdrop} /> : null}
-      <div className="relative mx-auto max-w-7xl px-5 py-20 sm:px-8 sm:py-28">{children}</div>
+      <div className="relative mx-auto max-w-7xl overflow-hidden px-5 py-20 sm:px-8 sm:py-28">{children}</div>
     </section>
   );
 }
@@ -81,7 +76,7 @@ export default function Home() {
       <StatsCounter />
 
       {/* ── About ─────────────────────────────────────────────────────────── */}
-      <Section id="about" backdrop="wires" className="border-t border-border-subtle">
+      <Section id="about" className="border-t border-border-subtle">
         <div className="grid gap-12 lg:grid-cols-[1fr_1.1fr] lg:gap-16">
           <Reveal variant="left">
             <SectionHeading
@@ -123,7 +118,7 @@ export default function Home() {
       <HighlightsGrid />
 
       {/* ── Music ──────────────────────────────────────────────────────────── */}
-      <Section id="music" backdrop="dots" className="border-t border-border-subtle">
+      <Section id="music" className="border-t border-border-subtle">
         <Reveal>
           <SectionHeading
             eyebrow="Music"
@@ -156,7 +151,7 @@ export default function Home() {
       <MusicPlayer />
 
       {/* ── Gallery ────────────────────────────────────────────────────────── */}
-      <Section id="gallery" backdrop="dots" className="border-t border-border-subtle">
+      <Section id="gallery" className="border-t border-border-subtle">
         <Reveal>
           <SectionHeading
             eyebrow="Gallery"
@@ -190,7 +185,7 @@ export default function Home() {
       <CollaborationsSection />
 
       {/* ── Occasions ───────────────────────────────────────────────────────── */}
-      <Section id="occasions" backdrop="wires" className="border-t border-border-subtle">
+      <Section id="occasions" className="border-t border-border-subtle">
         <Reveal>
           <SectionHeading
             eyebrow="Occasions"
@@ -209,7 +204,7 @@ export default function Home() {
       </Section>
 
       {/* ── Availability ─────────────────────────────────────────────────────── */}
-      <Section id="availability" backdrop="dots" className="border-t border-border-subtle">
+      <Section id="availability" className="border-t border-border-subtle">
         <div className="grid gap-12 lg:grid-cols-[1fr_1.2fr] lg:gap-16">
           <Reveal variant="left">
             <SectionHeading
@@ -236,7 +231,7 @@ export default function Home() {
       <FaqAccordion />
 
       {/* ── Enquiry ────────────────────────────────────────────────────────── */}
-      <Section id="enquiry" backdrop="wires" className="border-t border-border-subtle">
+      <Section id="enquiry" className="border-t border-border-subtle">
         <div className="grid gap-12 lg:grid-cols-[1fr_1.3fr] lg:gap-16">
           <Reveal variant="left">
             <SectionHeading
@@ -269,7 +264,7 @@ export default function Home() {
         <Reveal variant="scale">
           <div className="relative overflow-hidden rounded-3xl border border-glass-border bg-surface-1/60 px-6 py-16 text-center backdrop-blur-xl sm:px-12 sm:py-24">
             <div aria-hidden="true" className="ambience absolute inset-0 opacity-60" />
-            <div aria-hidden="true" className="grid-dots absolute inset-0 opacity-70" />
+            <div aria-hidden="true" className="spot absolute inset-0 opacity-70" />
             <div className="relative">
               <p className="eyebrow mb-5 flex items-center justify-center gap-3 text-crimson">
                 <span aria-hidden="true" className="led text-crimson led-breathe" />

@@ -69,7 +69,7 @@ export function Testimonials() {
         </Reveal>
         <Reveal delay={1} className="mt-10">
           <div className="relative overflow-hidden rounded-3xl border border-dashed border-border-strong bg-surface-1/60 p-10 text-center">
-            <div aria-hidden="true" className="grid-dots absolute inset-0 opacity-60" />
+            <div aria-hidden="true" className="spot absolute inset-0 opacity-60" />
             <div className="relative">
               <span className="mx-auto grid h-12 w-12 place-items-center rounded-full border border-crimson/35 text-crimson led-bloom">
                 <Quote className="h-5 w-5" aria-hidden="true" />
@@ -121,7 +121,7 @@ export function Testimonials() {
           }}
           className="relative overflow-hidden rounded-3xl border border-glass-border bg-surface-1/60 backdrop-blur-xl"
         >
-          <div aria-hidden="true" className="grid-dots absolute inset-0 opacity-50" />
+          <div aria-hidden="true" className="spot absolute inset-0 opacity-50" />
 
           {/* Track */}
           <div
