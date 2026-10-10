@@ -227,6 +227,11 @@ Checks performed:
 
 ## Deploy to Vercel
 
+> **Full copy-paste walkthrough:** see **[DEPLOY.md](./DEPLOY.md)** — prerequisites,
+> the exact CLI commands, the database + env-var setup, migrations, post-deploy
+> verification and a troubleshooting table. A helper script, `./deploy.sh`,
+> automates everything except the interactive `vercel login` and the database signup.
+
 This is a **React + Vite (frontend) + tRPC/Hono (backend) + Postgres** app — **not**
 Next.js. It deploys to Vercel as a **static SPA build** plus **one Serverless
 Function** that serves the whole backend. No migration to another framework was
