@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { ArrowUpRight, Menu, X } from "lucide-react";
+import { ArrowUpRight, Lock, Menu, X } from "lucide-react";
 import { MailGlyph, PhoneGlyph, SOCIAL_GLYPHS, WhatsAppGlyph } from "./icons";
 import { cn } from "@/lib/utils";
 import { navItems, type SocialKey } from "@/data/site";
@@ -106,6 +106,20 @@ export function Nav() {
         </nav>
 
         <div className="flex items-center gap-2.5">
+          {/*
+            The way into the password-protected dashboard. An icon-only ghost
+            button, deliberately low-contrast so it reads as site chrome rather
+            than a call to action — discoverable, never shouting.
+          */}
+          <Link
+            href="/admin"
+            aria-label="Admin sign-in"
+            title="Admin"
+            className="grid h-10 w-10 place-items-center rounded-full border border-transparent text-ink-faint transition-all duration-300 hover:border-glass-border hover:text-foreground"
+          >
+            <Lock className="h-[1.05rem] w-[1.05rem]" aria-hidden="true" />
+          </Link>
+
           <Link
             href="/contact"
             className="hidden items-center gap-2 rounded-full border border-crimson/45 bg-crimson/10 px-5 py-2 text-[0.8125rem] font-semibold text-foreground transition-all duration-300 hover:border-crimson hover:bg-crimson hover:text-white sm:inline-flex"
@@ -157,6 +171,13 @@ export function Nav() {
             className="mt-4 rounded-full border border-crimson/45 bg-crimson/15 px-5 py-3 text-center text-sm font-semibold text-foreground"
           >
             Book an event
+          </Link>
+          <Link
+            href="/admin"
+            className="mono mt-3 inline-flex items-center justify-center gap-2 text-[0.625rem] uppercase tracking-[0.2em] text-ink-faint transition-colors hover:text-foreground"
+          >
+            <Lock className="h-3.5 w-3.5" aria-hidden="true" />
+            Admin
           </Link>
         </nav>
       </div>
@@ -269,10 +290,28 @@ export function Footer() {
           <p className="mono text-[0.6875rem] uppercase tracking-[0.18em] text-ink-faint">
             © {new Date().getFullYear()} {settings.artist}
           </p>
-          <p className="mono flex items-center gap-2.5 text-[0.6875rem] uppercase tracking-[0.18em] text-ink-faint">
-            <StatusDot tone="accent" breathe />
-            {settings.role}
-          </p>
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+            <p className="mono flex items-center gap-2.5 text-[0.6875rem] uppercase tracking-[0.18em] text-ink-faint">
+              <StatusDot tone="accent" breathe />
+              {settings.role}
+            </p>
+            {/*
+              Quiet, always-present way into the password-protected dashboard.
+              Faint by default so it never competes with the content above.
+            */}
+            <Link
+              href="/admin"
+              aria-label="Admin sign-in"
+              className="mono group inline-flex items-center gap-2 text-[0.6875rem] uppercase tracking-[0.18em] text-ink-faint transition-colors hover:text-foreground"
+            >
+              <Lock className="h-3.5 w-3.5" aria-hidden="true" />
+              Admin
+              <ArrowUpRight
+                aria-hidden="true"
+                className="h-3 w-3 opacity-0 transition-all duration-300 group-hover:opacity-100"
+              />
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
