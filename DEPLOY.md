@@ -293,6 +293,9 @@ Add the DNS records Vercel shows (an `A`/`ALIAS` for the apex, a `CNAME` for
 
 | Symptom | Cause | Fix |
 |---|---|---|
+| **Deploy fails: `ENOENT: no such file or directory, readlink '/vercel/path0/dist/public/...'`** | `.vercelignore` excluded `dist`, so the serverless function's `includeFiles: "dist/public/**"` trace had nothing to read. | Remove any bare `dist` line from `.vercelignore` (the output is ~1.7 MB and must be uploaded; `dist/**/*.map` may stay ignored). Fixed in this repo. |
+| **Build logs `error TS2688: Cannot find type definition file for 'node' / 'vite/client'`** | `tsconfig.json` listed an explicit `"types"` array that Vercel's prebuilt-function transpiler cannot resolve. | Types now come from the globals (`@types/node` is auto-included) plus `client/src/vite-env.d.ts`. Fixed in this repo. |
+| **`vercel` says `Error: The specified token is not valid`** | You are not logged in and there is no `VERCEL_TOKEN` in the environment. | Run `vercel login`, or export a `VERCEL_TOKEN` from https://vercel.com/account/tokens. To deploy with **no account at all**: `vercel deploy --temporary`. |
 | **`No Output Directory named "dist/public"`** | The build did not run, or `vercel.json` was ignored. | Confirm you ran `vercel` from the **project root** (the folder with `package.json` and `vercel.json`). Do not set an output dir in the dashboard — `vercel.json` owns it. |
 | **`Error: JWT_SECRET is required`** at boot | Env var missing for that environment. | `vercel env add JWT_SECRET production` **and** `preview`, then redeploy (`vercel --prod`). Env changes need a new deployment. |
 | **500 on `/api` or `/trpc`** | Usually a missing/invalid `DATABASE_URL`, or migrations not run. | Check `vercel logs <deployment-url>`. Verify `DATABASE_URL` is the **pooled** string and that Step 6 ran. |

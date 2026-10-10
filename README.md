@@ -252,6 +252,10 @@ Repository: `https://github.com/wotshan/shandip-singer-website`
 npm i -g vercel          # or: pnpm add -g vercel
 vercel login
 
+> **No Vercel account handy?** You can still produce a live, claimable preview
+> with no login at all: `vercel deploy --temporary`. It prints a working URL you
+> can later claim into your account. See DEPLOY.md for details.
+
 # 2. From the PROJECT ROOT (the folder with package.json)
 cd shandip-singer-website
 

@@ -16,6 +16,12 @@
     { "source": "/trpc/(.*)", "destination": "/api" },
     { "source": "/app-storage", "destination": "/api" },
     { "source": "/app-storage/(.*)", "destination": "/api" },
+    { "source": "/health",               "destination": "/api" },
+    { "source": "/api/health",           "destination": "/api" },
+    { "source": "/api/trpc/(.*)",        "destination": "/api" },
+    { "source": "/api/app-storage/(.*)", "destination": "/api" },
+    { "source": "/api/_jobs/(.*)",       "destination": "/api" },
+
     { "source": "/((?!api/).*)", "destination": "/api" }
   ]
 }

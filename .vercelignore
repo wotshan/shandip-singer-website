@@ -4,9 +4,15 @@
 # Anything the BUILD needs must stay: client/, server/, shared/, drizzle/,
 # api/, scripts/, and every config file are all required.
 
-# Build output is produced on Vercel; shipping the local copy wastes upload time
-# (and the function's includeFiles pulls dist/public from the BUILD output).
-dist
+# Build output IS uploaded here — do NOT add a bare `dist` line.
+#
+# `vercel.json` sets functions."api/index.ts".includeFiles = "dist/public/**", so
+# Vercel BUILDS the serverless function locally ("prebuilt") and traces the SPA
+# files into it. Ignoring `dist` makes that trace fail at deploy time with:
+#     Error: ENOENT: no such file or directory,
+#       readlink '/vercel/path0/dist/public/assets/index-*.css'
+# The output is only ~1.7 MB and the build regenerates it anyway.
+dist/**/*.map
 
 # Local env + logs (never upload secrets)
 .env
