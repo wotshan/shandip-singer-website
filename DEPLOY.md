@@ -6,9 +6,10 @@ Function** that serves the whole backend. Nothing was migrated: `server/_core/ap
 exposes the same Hono app the Docker image runs, and `api/index.ts` is the Vercel
 entry that points at it.
 
-> **Why the CLI path?** The GitHub account `codeswithshan` is currently **suspended**,
-> so the GitHub-integration / Deploy-Button path cannot connect. The Vercel CLI
-> deploys the **local folder** and needs no GitHub access at all. Use it.
+> **Two paths.** The **CLI** (Steps 1–7 below) deploys the local folder and needs
+> no GitHub access at all. The **one-click import** (Step 2b) imports the GitHub
+> repo `wotshan/shandip-singer-website` (private — the earlier `codeswithshan`
+> account is suspended, which is why the repo now lives under `wotshan`).
 
 Everything below is copy-paste ready. Commands are run from the **project root** —
 the folder that contains `package.json` (in this workspace that is `app/`).
@@ -92,6 +93,32 @@ You do **not** need to configure the build command, output directory or rewrites
 
 This first run produces a **preview** URL. It will fail to boot the API until the
 env vars exist (Step 5) — that is expected; continue.
+
+---
+
+## Step 2b — One-click import from GitHub (alternative to Steps 1–2)
+
+Repo: `wotshan/shandip-singer-website` — **private**. The exact click path:
+
+1. **Install the Vercel GitHub App once** (so no token is needed):
+   **vercel.com → Add New… → Project → Import Git Repository → Configure GitHub
+   App → Install → pick the `wotshan` account → Only select repositories →
+   `shandip-singer-website` → Install.** (Also reachable at
+   https://github.com/apps/vercel → Install.)
+2. **Open the import link** (this is already your repo):
+   `https://vercel.com/new/clone?repository-url=https://github.com/wotshan/shandip-singer-website`
+   — or **Add New… → Project**, then pick `shandip-singer-website` from the list.
+3. **Leave the framework settings alone.** `vercel.json` already sets the build
+   command (`pnpm build:web`), the output directory (`dist/public`), the
+   `api/index.ts` function and the rewrites. If the dashboard shows the **Vite**
+   preset, that is correct — do **not** override build/output there.
+4. **Add the environment variables** from **Step 5 Option B** (the import form has
+   an *Environment Variables* section — same keys).
+5. **Deploy**, then continue at **Step 6** (migrations) and **Step 8** (verify).
+
+> The old account `codeswithshan` is **suspended**, which is why the repo is under
+> `wotshan`. If the App is later uninstalled, this link stops working — the CLI
+> path (Step 1) is the fallback that needs no GitHub access.
 
 ---
 
@@ -271,6 +298,7 @@ Add the DNS records Vercel shows (an `A`/`ALIAS` for the apex, a `CNAME` for
 | **`pnpm install --frozen-lockfile` fails** | `pnpm-lock.yaml` out of sync with `package.json`. | Run `pnpm install` locally and commit the updated lockfile. |
 | **Admin login says "too many attempts"** | The in-process rate limiter tripped. | Wait a minute. On Vercel the limiter is per-instance/best-effort (see below). |
 | **`/trpc/...` returns HTML instead of JSON** | Rewrites not applied. | Ensure `vercel.json` is committed and you deployed from the project root. |
+| **Import shows "No repositories" / 404 on the import link** | The Vercel GitHub App is not installed on `wotshan`, or it was not granted access to this repo. | Install/authorize the App on `wotshan` and allow `shandip-singer-website` (Step 2b), then reopen the import link. The repo is private — the CLI path (Step 1) always works with no GitHub access. |
 
 ---
 

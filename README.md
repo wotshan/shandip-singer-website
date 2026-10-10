@@ -6,8 +6,8 @@
 <p align="center"><strong>Premium cinematic singer website for a live performer brand.</strong></p>
 
 <p align="center">
-  <a href="https://github.com/codeswithshan/shandip-singer-website/actions/workflows/ci.yml">
-    <img src="https://github.com/codeswithshan/shandip-singer-website/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI status" />
+  <a href="https://github.com/wotshan/shandip-singer-website/actions/workflows/ci.yml">
+    <img src="https://github.com/wotshan/shandip-singer-website/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI status" />
   </a>
   <img src="https://img.shields.io/badge/React-19-111111?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React 19" />
   <img src="https://img.shields.io/badge/TypeScript-7-111111?style=for-the-badge&logo=typescript&logoColor=3178C6" alt="TypeScript 7" />
@@ -239,13 +239,13 @@ needed: `server/_core/app.ts` exposes the same Hono app the Docker image runs, a
 `api/index.ts` is the Vercel entry that points at it. The existing **Cloud
 Run/Docker** path still works and is unchanged (`node dist/index.js`).
 
-Repository: `https://github.com/codeswithshan/shandip-singer-website`
+Repository: `https://github.com/wotshan/shandip-singer-website` (private)
 
 ### Option A — Vercel CLI (recommended; no GitHub needed)
 
-> The GitHub account `codeswithshan` is currently **suspended**, so the
-> GitHub-integration path (Option B) cannot connect. The CLI deploys the **local
-> folder** and needs no GitHub access at all — use this while the account is down.
+> The Vercel CLI deploys the **local folder** and needs no GitHub access at all.
+> A GitHub-based one-click import (Option B) works too — the repo now lives under
+> `wotshan` (the earlier `codeswithshan` account is suspended).
 
 ```bash
 # 1. One-time setup
@@ -273,13 +273,17 @@ vercel --prod
 build command, output directory or rewrites in the dashboard. If prompted, accept
 the detected framework; `vercel.json` overrides anything you pick here.
 
-### Option B — Deploy Button (one click, needs a working GitHub account)
+### Option B — One-click import (repo is under `wotshan`)
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fcodeswithshan%2Fshandip-singer-website&project-name=raag-sargam&repository-name=raag-sargam)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fwotshan%2Fshandip-singer-website&project-name=raag-sargam&repository-name=raag-sargam)
 
-The button clones the repo into your Vercel account and prompts for the
-environment variables. It requires the GitHub account to be active — see Option A
-while it is suspended. (Once restored, this is genuinely one click.)
+Direct import link: `https://vercel.com/new/clone?repository-url=https://github.com/wotshan/shandip-singer-website`
+
+The repo is **private**, so authorize the **Vercel GitHub App** on `wotshan` once:
+Vercel → **Add New → Project → Import Git Repository → Configure GitHub App →
+Install → `wotshan` → Only select repositories → `shandip-singer-website`**. The
+import form then pre-fills from `vercel.json` — add the env vars and click Deploy.
+Exact clicks: **DEPLOY.md Step 2b**.
 
 ### Required environment variables
 
