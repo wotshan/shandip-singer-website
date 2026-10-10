@@ -239,7 +239,7 @@ needed: `server/_core/app.ts` exposes the same Hono app the Docker image runs, a
 `api/index.ts` is the Vercel entry that points at it. The existing **Cloud
 Run/Docker** path still works and is unchanged (`node dist/index.js`).
 
-Repository: `https://github.com/wotshan/shandip-singer-website` (private)
+Repository: `https://github.com/wotshan/shandip-singer-website`
 
 ### Option A — Vercel CLI (recommended; no GitHub needed)
 
@@ -279,11 +279,12 @@ the detected framework; `vercel.json` overrides anything you pick here.
 
 Direct import link: `https://vercel.com/new/clone?repository-url=https://github.com/wotshan/shandip-singer-website`
 
-The repo is **private**, so authorize the **Vercel GitHub App** on `wotshan` once:
-Vercel → **Add New → Project → Import Git Repository → Configure GitHub App →
-Install → `wotshan` → Only select repositories → `shandip-singer-website`**. The
-import form then pre-fills from `vercel.json` — add the env vars and click Deploy.
-Exact clicks: **DEPLOY.md Step 2b**.
+**If the repo is public**, the link above imports it directly — no authorization
+step at all. **If you switch it back to private**, authorize the **Vercel GitHub
+App** on `wotshan` once: Vercel → **Add New → Project → Import Git Repository →
+Configure GitHub App → Install → `wotshan` → Only select repositories →
+`shandip-singer-website`**. Either way the import form pre-fills from
+`vercel.json` — add the env vars and click Deploy. Exact clicks: **DEPLOY.md Step 2b**.
 
 ### Required environment variables
 

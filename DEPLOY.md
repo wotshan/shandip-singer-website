@@ -8,8 +8,8 @@ entry that points at it.
 
 > **Two paths.** The **CLI** (Steps 1–7 below) deploys the local folder and needs
 > no GitHub access at all. The **one-click import** (Step 2b) imports the GitHub
-> repo `wotshan/shandip-singer-website` (private — the earlier `codeswithshan`
-> account is suspended, which is why the repo now lives under `wotshan`).
+> repo `wotshan/shandip-singer-website` (the earlier `codeswithshan` account is
+> suspended, which is why the repo now lives under `wotshan`).
 
 Everything below is copy-paste ready. Commands are run from the **project root** —
 the folder that contains `package.json` (in this workspace that is `app/`).
@@ -98,11 +98,13 @@ env vars exist (Step 5) — that is expected; continue.
 
 ## Step 2b — One-click import from GitHub (alternative to Steps 1–2)
 
-Repo: `wotshan/shandip-singer-website` — **private**. The exact click path:
+Repo: `wotshan/shandip-singer-website`. **Skip step 1 if the repo is public** — the
+import link works with no authorization. Do step 1 only if you switch it back to
+private.
 
-1. **Install the Vercel GitHub App once** (so no token is needed):
-   **vercel.com → Add New… → Project → Import Git Repository → Configure GitHub
-   App → Install → pick the `wotshan` account → Only select repositories →
+1. **(Private repos only) Install the Vercel GitHub App once** (so no token is
+   needed): **vercel.com → Add New… → Project → Import Git Repository → Configure
+   GitHub App → Install → pick the `wotshan` account → Only select repositories →
    `shandip-singer-website` → Install.** (Also reachable at
    https://github.com/apps/vercel → Install.)
 2. **Open the import link** (this is already your repo):
