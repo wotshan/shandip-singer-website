@@ -225,6 +225,99 @@ Checks performed:
 - `pnpm typecheck`
 - `pnpm test`
 
+## Deploy to Vercel
+
+This is a **React + Vite (frontend) + tRPC/Hono (backend) + Postgres** app — **not**
+Next.js. It deploys to Vercel as a **static SPA build** plus **one Serverless
+Function** that serves the whole backend. No migration to another framework was
+needed: `server/_core/app.ts` exposes the same Hono app the Docker image runs, and
+`api/index.ts` is the Vercel entry that points at it. The existing **Cloud
+Run/Docker** path still works and is unchanged (`node dist/index.js`).
+
+Repository: `https://github.com/codeswithshan/shandip-singer-website`
+
+### Option A — Vercel CLI (recommended; no GitHub needed)
+
+> The GitHub account `codeswithshan` is currently **suspended**, so the
+> GitHub-integration path (Option B) cannot connect. The CLI deploys the **local
+> folder** and needs no GitHub access at all — use this while the account is down.
+
+```bash
+# 1. One-time setup
+npm i -g vercel          # or: pnpm add -g vercel
+vercel login
+
+# 2. From the PROJECT ROOT (the folder with package.json)
+cd shandip-singer-website
+
+# 3. Preview deploy (creates/links the project on first run)
+vercel                   # answer the prompts; accept the detected "Vite" settings
+
+# 4. Add environment variables (see the table below) — interactive, one per key
+vercel env add DATABASE_URL production
+vercel env add DATABASE_URL preview
+vercel env add JWT_SECRET production
+vercel env add JWT_SECRET preview
+# …repeat for every key in the table…
+
+# 5. Production deploy
+vercel --prod
+```
+
+`vercel` reads `vercel.json` automatically — you do **not** need to configure the
+build command, output directory or rewrites in the dashboard. If prompted, accept
+the detected framework; `vercel.json` overrides anything you pick here.
+
+### Option B — Deploy Button (one click, needs a working GitHub account)
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fcodeswithshan%2Fshandip-singer-website&project-name=raag-sargam&repository-name=raag-sargam)
+
+The button clones the repo into your Vercel account and prompts for the
+environment variables. It requires the GitHub account to be active — see Option A
+while it is suspended. (Once restored, this is genuinely one click.)
+
+### Required environment variables
+
+| Variable | Required | What it is / where to get it |
+|---|---|---|
+| `DATABASE_URL` | **Yes** | Postgres connection string. Neon → *Connection Details* → **Pooled** string; Supabase → *Database* → **Connection pooling** → URI. Migrations need the **direct** (non-pooled) URL instead — see `drizzle.config.ts`. |
+| `JWT_SECRET` | **Yes** | Signs the admin session cookie. Any long random string: `openssl rand -base64 48`. Changing it just logs the admin out. |
+| `DB_DRIVER` | No (default `tcp`) | `tcp` = node-postgres pool. `http` = Neon serverless HTTP driver — the best fit for scale-to-zero serverless on Neon. |
+| `DB_POOL_MAX` | No (default `5`) | Max pooled connections per instance. Keep **1–3** on Vercel. |
+| `AUTH_PROVIDER` | No (default `local`) | Only `local` is implemented (single admin, bcrypt, no signup). |
+| `APP_SLUG` | No (default `app`) | Names the session cookie (`app_session_<slug>`). Keep it stable. |
+| `NODE_ENV` | No | Vercel sets `production` for you. |
+| `APP_STORAGE_PRESIGN_URL` / `APP_STORAGE_TOKEN` | No | Only for the admin **image/audio uploader**. Leave blank to run without uploads (the admin can paste an external URL or a local `/images/...` path). |
+
+Add them in the dashboard under **Project → Settings → Environment Variables**, or
+with `vercel env add <NAME> <environment>`. **Never commit a real `.env`** — it is
+gitignored, and `.env.example` documents every key without any values.
+
+### What works on Vercel, and what does not
+
+Everything the public site does works serverless: browsing, the availability
+calendar, the booking form, the newsletter signup, the admin login and every CRUD
+write. Two things are **inherently stateful** and behave differently on a
+serverless host — both are handled, but know the trade-off:
+
+- **Login rate limiting** (`server/admin.ts`) uses an in-process `Map`. On Vercel
+  it becomes **per-instance and best-effort** rather than one global counter. It
+  still blunts brute force; for a hard global limit, move the counter to the
+  database (a `login_attempts` table) or a KV store.
+- **Scheduled jobs** cannot live in the function (a timer dies when the response
+  ends). Use the platform's signed job callback (`POST /api/_jobs/:name`), or the
+  Vercel Cron feature pointed at the same endpoint.
+- **Local filesystem writes** do not persist — only `/tmp` is writable, and it is
+  per-instance. That is why uploads go through the storage proxy, not to disk.
+
+### Alternative hosts (if you prefer a resident process)
+
+Because the backend is a plain Hono app, the Docker image in this repo runs
+unchanged on **Railway**, **Render**, or **Fly.io**: build with `pnpm build`, run
+`node dist/index.js`, expose port `3000`, and set the same environment variables.
+Those hosts keep a process alive, so the in-memory rate limiter and scheduled jobs
+work there exactly as designed.
+
 ## Contact
 
 These are the real public contact channels currently wired into the site:

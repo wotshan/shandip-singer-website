@@ -10,6 +10,7 @@
     "build": "pnpm build:web && pnpm build:api",
     "build:web": "vite build",
     "build:api": "node scripts/build-server.mjs",
+    "build:vercel": "vercel build",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
@@ -44,6 +45,7 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "4.3.3",
+    "@vercel/node": "^23.0.1",
     "@types/node": "24.13.3",
     "@types/pg": "8.20.0",
     "@types/react": "19.2.17",

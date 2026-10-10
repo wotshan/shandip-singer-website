@@ -1,0 +1,35 @@
+# Upload excludes for Vercel (the build then regenerates anything it needs).
+#
+# The DEFAULTS already skip node_modules/.git; these are the repo-specific ones.
+# Anything the BUILD needs must stay: client/, server/, shared/, drizzle/,
+# api/, scripts/, and every config file are all required.
+
+# Build output is produced on Vercel; shipping the local copy wastes upload time
+# (and the function's includeFiles pulls dist/public from the BUILD output).
+dist
+
+# Local env + logs (never upload secrets)
+.env
+.env.*
+!.env.example
+.webapp-logs
+*.log
+
+# Sandbox-only scratch: screenshots, version snapshots and helper assets that
+# have nothing to do with the deployed app.
+shots
+shots2
+shots3
+shots4
+shots_admin
+shots_cal
+shots_intro
+tiles
+tmp_capture
+downloads
+gallery_src
+readme_assets
+*.pid
+
+# Editor / OS noise
+.DS_Store

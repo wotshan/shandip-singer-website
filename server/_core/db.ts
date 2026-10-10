@@ -46,7 +46,28 @@ function makeTcp() {
   // is one of many against a single shared Postgres cluster. node-postgres closes
   // idle clients on its own, so the cap only binds under concurrent load — which
   // is exactly when an unbounded pool would take slots away from other apps.
-  const pool = new pg.Pool({ connectionString: env.databaseUrl, max: env.dbPoolMax });
+  //
+  // SERVERLESS-SAFE TIMEOUTS. The pool object is a module-level singleton, so a
+  // frozen-then-resumed serverless instance reuses its connections instead of
+  // dialing a fresh one per request. The three timeouts below exist because a
+  // serverless host gives each instance a fixed, short lifetime: without them an
+  // instance can sit on connections a scale-to-zero database has already closed,
+  // and every request pays for the dead socket before reconnecting.
+  //   connectionTimeoutMillis — fail fast when the DB is unreachable or the
+  //                             connection limit is hit, instead of hanging until
+  //                             the platform kills the request.
+  //   idleTimeoutMillis       — close an idle client well before the DB (or a
+  //                             proxy in front of it) would time it out itself.
+  //   query_timeout/statement_timeout — put a ceiling on a single statement so one
+  //                             runaway query cannot hold the (small) pool open.
+  const pool = new pg.Pool({
+    connectionString: env.databaseUrl,
+    max: env.dbPoolMax,
+    connectionTimeoutMillis: 10_000,
+    idleTimeoutMillis: 30_000,
+    query_timeout: 20_000,
+    statement_timeout: 20_000,
+  });
   // A pool with no error handler is a process that exits. Postgres (and Neon)
   // closes idle connections, and on a scale-to-zero runtime the container is
   // frozen between requests, so this is the normal case, not the exotic one:
