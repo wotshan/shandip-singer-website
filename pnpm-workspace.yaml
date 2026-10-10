@@ -3,6 +3,3 @@
 # (pnpm 11 moved this out of package.json's "pnpm" field into this file.)
 allowBuilds:
   esbuild: true
-minimumReleaseAgeExclude:
-  - '@vercel/build-utils@14.20.1'
-  - '@vercel/node@23.0.1'
