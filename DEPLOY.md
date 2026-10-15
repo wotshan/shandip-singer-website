@@ -220,6 +220,30 @@ DATABASE_URL="postgresql://…direct…" pnpm db:migrate
 `pnpm db:migrate` runs `drizzle-kit migrate` (see `drizzle.config.ts`). Expected
 output ends with the applied migration files and no errors.
 
+### Prefer the explicit runner (recommended)
+
+`pnpm db:migrate` trusts `meta/_journal.json` completely, so a `.sql` file the
+journal does not list is **silently skipped** — which is exactly how this project
+once shipped a production database missing 8 tables. Two scripts close that
+hole:
+
+```bash
+# Applies every journal-listed migration and records each one ONLY after its SQL
+# actually ran (one transaction per migration). Safe to run any number of times.
+DATABASE_URL="postgresql://…direct…" pnpm db:apply
+
+# Reports any table or column drizzle/schema.ts declares that this database is
+# missing. Exits non-zero when something is absent, so it can gate a deploy.
+DATABASE_URL="postgresql://…direct…" pnpm db:check
+```
+
+**Always finish Step 6 by running `pnpm db:check`.** It should print
+`schema is complete — every table and column the app needs exists.` If it does
+not, the names it lists are exactly what the admin dashboard would 500 on.
+
+> `scripts/_record-migration.ts` is **deprecated and disabled** — it recorded a
+> migration as applied without running it. Use `pnpm db:apply` instead.
+
 **Optional — seed real content** (only if you want the starter rows):
 
 ```bash
@@ -303,6 +327,8 @@ Add the DNS records Vercel shows (an `A`/`ALIAS` for the apex, a `CNAME` for
 | **`pnpm install --frozen-lockfile` fails** | `pnpm-lock.yaml` out of sync with `package.json`. | Run `pnpm install` locally and commit the updated lockfile. |
 | **Admin login says "too many attempts"** | The in-process rate limiter tripped. | Wait a minute. On Vercel the limiter is per-instance/best-effort (see below). |
 | **`/trpc/...` returns HTML instead of JSON** | Rewrites not applied. | Ensure `vercel.json` is committed and you deployed from the project root. |
+| **Public site looks perfect but every admin dashboard screen 500s** | The client keeps a static fallback of the site content (see `shared/types.ts`), so public pages render even when the API is down — but the dashboard has no fallback. The API itself is usually fine; the **database is missing tables/columns**, so `content.getSite` (which reads every table in one `Promise.all`) answers 500. | `pnpm db:check` lists the missing tables/columns. Then `DATABASE_URL="…direct…" pnpm db:apply`. Never hand-edit `meta/_journal.json` or insert into `drizzle.__drizzle_migrations` directly — `pnpm db:apply` records a migration only after running it, and `server/schema-migrations.test.ts` fails CI if a `.sql` file is missing from the journal. |
+| **`error 42703: column "…" does not exist`** | Same cause: a migration that adds the column is not listed in `meta/_journal.json`, so it never ran on this database. | Run `pnpm db:check`, then `pnpm db:apply`. |
 | **Import shows "No repositories" / 404 on the import link** | The Vercel GitHub App is not installed on `wotshan`, or it was not granted access to this repo. | Install/authorize the App on `wotshan` and allow `shandip-singer-website` (Step 2b), then reopen the import link. The repo is private — the CLI path (Step 1) always works with no GitHub access. |
 
 ---
