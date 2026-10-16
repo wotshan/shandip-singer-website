@@ -56,10 +56,18 @@ export function createApp(): Hono {
   });
   const trpcMount = async (c: Context) => {
     const res = await trpc(c, async () => {});
-    // Buffer the body and rebuild the Response: a streamed body returned from a
-    // middleware mount loses Set-Cookie on Vercel, a buffered one does not.
     const body = await res.arrayBuffer();
-    return new Response(body, { status: res.status, headers: res.headers });
+    // Build the final response through Hono's own builder (c.body). Vercel's
+    // Node.js runtime forwards Set-Cookie only for a Hono-built response; a raw
+    // `new Response(...)` returned from a middleware mount loses it. c.body()
+    // starts from Hono's prepared headers, which is where setCookie() wrote the
+    // session cookie, so the cookie survives; the adapter's other headers
+    // (content-type, vary) are copied over explicitly.
+    const out = c.body(body, res.status);
+    res.headers.forEach((v, k) => {
+      if (k.toLowerCase() !== "set-cookie") out.headers.set(k, v);
+    });
+    return out;
   };
   app.use("/trpc/*", trpcMount);
   app.use("/api/trpc/*", trpcMount);
