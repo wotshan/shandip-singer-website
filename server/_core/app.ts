@@ -84,6 +84,17 @@ export function createApp(): Hono {
     createContext: (_o, c) => ({ c }),
   });
   app.use("/_debug/trpcmw/*", dbgTrpc);
+  app.use("/_debug/trpchdr/*", async (c) => {
+    await dbgTrpc(c, async () => {});
+    const hdrs: Record<string, string> = {};
+    c.res.headers.forEach((v, k) => { hdrs[k] = v; });
+    return c.json({ sc: c.res.headers.getSetCookie(), hdrs });
+  });
+  app.use("/_debug/trpcappend/*", async (c) => {
+    await dbgTrpc(c, async () => {});
+    c.header("Set-Cookie", "ap=1; Path=/; HttpOnly; Secure; SameSite=None", { append: true });
+    return c.res;
+  });
 
   // ── tRPC ──────────────────────────────────────────────────────────────────
   // Mounted under /trpc (Node runtime, and Vercel when its function mount
