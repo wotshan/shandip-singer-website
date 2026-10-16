@@ -33,6 +33,13 @@ export function createApp(): Hono {
   app.get("/health", health);
   app.get("/api/health", health);
 
+  // TEMP DEBUG (remove after diagnosis): proves whether the host forwards
+  // Set-Cookie from a Web Response at all.
+  app.get("/_debug/cookie", (c) => {
+    c.header("Set-Cookie", "dbg=1; Path=/; HttpOnly; Secure; SameSite=None");
+    return c.json({ ok: true });
+  });
+
   // ── tRPC ──────────────────────────────────────────────────────────────────
   // Mounted under /trpc (Node runtime, and Vercel when its function mount
   // prefix is stripped) AND under /api/trpc (Vercel when the prefix is kept).
