@@ -27,4 +27,6 @@
 //     Anything scheduled must use the platform job callback, not setInterval.
 //   • The filesystem is read-only apart from /tmp, and /tmp is per-instance.
 //     That is why the SPA is read from the bundled build output, never written.
-export { default } from "../dist/vercel/index.js";
+// The bundle exports a NAMED `fetch` (Vercel's Web-standard function signature);
+// a default export would be treated as `(req, res) => void` and ignored.
+export { fetch } from "../dist/vercel/index.js";
