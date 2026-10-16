@@ -1,4 +1,4 @@
-// ── Application factory (transport-agnostic) ─────────────────────────────────
+// ── Application factory (transport-agnostic) ──────────────────────────────────
 //
 // This is the ONE place the route table is defined. Two runtimes serve the exact
 // same app instance so dev, Docker and Vercel cannot drift apart:
@@ -12,9 +12,7 @@
 // index.ts; the SPA read lives behind mountClient() (prod-only).
 import { Hono } from "hono";
 import type { Context } from "hono";
-import { setCookie } from "hono/cookie";
 import { trpcServer } from "@hono/trpc-server";
-import { router, publicProcedure } from "./trpc";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveAppStorage } from "./storage";
@@ -35,74 +33,6 @@ export function createApp(): Hono {
   app.get("/health", health);
   app.get("/api/health", health);
 
-  // TEMP DEBUG (remove after diagnosis): proves whether the host forwards
-  // Set-Cookie from a Web Response at all.
-  app.get("/_debug/cookie", (c) => {
-    c.header("Set-Cookie", "dbg=1; Path=/; HttpOnly; Secure; SameSite=None");
-    return c.json({ ok: true });
-  });
-  app.get("/_debug/stream", (c) => {
-    c.header("Set-Cookie", "dbg2=1; Path=/; HttpOnly; Secure; SameSite=None");
-    const stream = new ReadableStream({
-      start(ctrl) {
-        ctrl.enqueue(new TextEncoder().encode('{"ok":true}'));
-        ctrl.close();
-      },
-    });
-    return c.body(stream, 200, { "content-type": "application/json" });
-  });
-  app.get("/_debug/setcookie", (c) => {
-    setCookie(c, "sc", "1", { path: "/", httpOnly: true, secure: true, sameSite: "None", partitioned: true });
-    return c.json({ ok: true });
-  });
-  app.get("/_debug/setcookie-nopart", (c) => {
-    setCookie(c, "scn", "1", { path: "/", httpOnly: true, secure: true, sameSite: "None" });
-    return c.json({ ok: true });
-  });
-  app.get("/_debug/trpclike", (c) => {
-    setCookie(c, "tl", "1", { path: "/", httpOnly: true, secure: true, sameSite: "None", partitioned: true });
-    const r = new Response(JSON.stringify({ ok: true }), {
-      headers: { "content-type": "application/json", vary: "trpc-accept, accept" },
-    });
-    return c.body(r.body, r);
-  });
-  app.use("/_debug/mw/*", async (c) => {
-    setCookie(c, "mw", "1", { path: "/", httpOnly: true, secure: true, sameSite: "None", partitioned: true });
-    const r = new Response(JSON.stringify({ ok: true }), {
-      headers: { "content-type": "application/json", vary: "trpc-accept, accept" },
-    });
-    return c.body(r.body, r);
-  });
-  // Real trpcServer on a debug path: isolates the adapter from the app router.
-  const dbgTrpc = trpcServer({
-    router: router({
-      ping: publicProcedure.mutation(async ({ ctx }) => {
-        setCookie(ctx.c, "dt", "1", { path: "/", httpOnly: true, secure: true, sameSite: "None", partitioned: true });
-        return { ok: true };
-      }),
-    }),
-    createContext: (_o, c) => ({ c }),
-  });
-  app.use("/_debug/trpcmw/*", dbgTrpc);
-  app.use("/_debug/trpchdr/*", async (c) => {
-    await dbgTrpc(c, async () => {});
-    const hdrs: Record<string, string> = {};
-    c.res.headers.forEach((v, k) => { hdrs[k] = v; });
-    return c.json({ sc: c.res.headers.getSetCookie(), hdrs });
-  });
-  app.use("/_debug/trpcappend/*", async (c) => {
-    await dbgTrpc(c, async () => {});
-    c.header("Set-Cookie", "ap=1; Path=/; HttpOnly; Secure; SameSite=None", { append: true });
-    return c.res;
-  });
-  // Re-emit the trpcServer response through c.body() so the host sees a normal
-  // route-handler Response (the shape that DOES forward set-cookie).
-  app.use("/_debug/trpcreemit/*", async (c) => {
-    await dbgTrpc(c, async () => {});
-    const r = c.res;
-    return c.body(r.body, r.status, r.headers);
-  });
-
   // ── tRPC ──────────────────────────────────────────────────────────────────
   // Mounted under /trpc (Node runtime, and Vercel when its function mount
   // prefix is stripped) AND under /api/trpc (Vercel when the prefix is kept).
@@ -110,12 +40,29 @@ export function createApp(): Hono {
   // one a given host uses — the client's hard-coded `/trpc` URL resolves either
   // way. This is deliberate insurance against an undocumented difference in how
   // a serverless host forwards the path; it costs one extra middleware mount.
+  //
+  // WHY THE WRAPPER, NOT `app.use(path, trpc)`. On Vercel's Node.js runtime a
+  // bare `app.use(path, trpcServer(...))` mount LOSES the `Set-Cookie` header:
+  // the adapter returns `c.body(res.body, res)`, and when Hono's compose assigns
+  // that Response via `context.res = res` the cookie never reaches the wire.
+  // Admin login then answered 200 with a valid user object but no session
+  // cookie, so the dashboard bounced straight back to the sign-in screen.
+  // Awaiting the adapter and returning `c.res` instead makes Hono build the
+  // final Response from its prepared headers (which DO carry Set-Cookie), and
+  // Vercel forwards it — verified end-to-end on the live deployment.
   const trpc = trpcServer({
     router: appRouter,
     createContext: (_opts, c) => createContext(c),
   });
-  app.use("/trpc/*", trpc);
-  app.use("/api/trpc/*", trpc);
+  const trpcMount = async (c: Context) => {
+    const res = await trpc(c, async () => {});
+    // Buffer the body and rebuild the Response: a streamed body returned from a
+    // middleware mount loses Set-Cookie on Vercel, a buffered one does not.
+    const body = await res.arrayBuffer();
+    return new Response(body, { status: res.status, headers: res.headers });
+  };
+  app.use("/trpc/*", trpcMount);
+  app.use("/api/trpc/*", trpcMount);
 
   // ── Scoped per-app file storage ───────────────────────────────────────────
   // 307 → short-lived signed S3 URL. Registered under the same two prefixes as
@@ -132,7 +79,7 @@ export function createApp(): Hono {
   app.post("/api/_jobs/:name", async (c) => {
     const signature = c.req.header("x-platform-signature");
     if (!signature /* || !verifyPlatformSignature(c, signature) */) {
-      return c.text("unauthorized (job callback signature required \u2014 DESIGN \u00a78.4)", 401);
+      return c.text("unauthorized (job callback signature required — DESIGN §8.4)", 401);
     }
     const handler = getJob(c.req.param("name"));
     if (!handler) return c.text("no such job", 404);
