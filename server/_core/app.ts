@@ -39,6 +39,16 @@ export function createApp(): Hono {
     c.header("Set-Cookie", "dbg=1; Path=/; HttpOnly; Secure; SameSite=None");
     return c.json({ ok: true });
   });
+  app.get("/_debug/stream", (c) => {
+    c.header("Set-Cookie", "dbg2=1; Path=/; HttpOnly; Secure; SameSite=None");
+    const stream = new ReadableStream({
+      start(ctrl) {
+        ctrl.enqueue(new TextEncoder().encode('{"ok":true}'));
+        ctrl.close();
+      },
+    });
+    return c.body(stream, 200, { "content-type": "application/json" });
+  });
 
   // ── tRPC ──────────────────────────────────────────────────────────────────
   // Mounted under /trpc (Node runtime, and Vercel when its function mount
