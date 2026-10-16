@@ -14,11 +14,19 @@
 // server/** + shared/** + drizzle/** modules into ONE file, so the only remaining
 // specifiers are bare package names that resolve from node_modules.
 //
-// The listener is created here (not in server/_core/index.ts) because that file
-// calls serve() and opens a port — something a serverless runtime must not do.
-import { getRequestListener } from "@hono/node-server";
+// WHY THE WEB SIGNATURE, NOT @hono/node-server. The first version of this file
+// exported `getRequestListener(app.fetch)` — a Node `(req, res)` listener. That
+// served every route correctly EXCEPT that the session cookie never reached the
+// browser: @hono/node-server's buildOutgoingHttpHeaders() hands `set-cookie` to
+// `res.writeHead()` as an ARRAY, and Vercel's Node runtime shim drops
+// array-valued `set-cookie`, so admin login returned 200 with a valid user object
+// but no Set-Cookie header — the dashboard then bounced straight back to the
+// sign-in screen. Hono's own Vercel adapter returns a Web `(Request) => Response`
+// handler instead; Vercel handles that Response natively and preserves
+// `set-cookie` (including the multiple cookies logout emits).
+import { handle } from "hono/vercel";
 import { createApp } from "./_core/app";
 
 const app = createApp();
 
-export default getRequestListener(app.fetch);
+export default handle(app);
