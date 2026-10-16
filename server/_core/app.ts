@@ -12,6 +12,7 @@
 // index.ts; the SPA read lives behind mountClient() (prod-only).
 import { Hono } from "hono";
 import type { Context } from "hono";
+import { setCookie } from "hono/cookie";
 import { trpcServer } from "@hono/trpc-server";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
@@ -48,6 +49,21 @@ export function createApp(): Hono {
       },
     });
     return c.body(stream, 200, { "content-type": "application/json" });
+  });
+  app.get("/_debug/setcookie", (c) => {
+    setCookie(c, "sc", "1", { path: "/", httpOnly: true, secure: true, sameSite: "None", partitioned: true });
+    return c.json({ ok: true });
+  });
+  app.get("/_debug/setcookie-nopart", (c) => {
+    setCookie(c, "scn", "1", { path: "/", httpOnly: true, secure: true, sameSite: "None" });
+    return c.json({ ok: true });
+  });
+  app.get("/_debug/trpclike", (c) => {
+    setCookie(c, "tl", "1", { path: "/", httpOnly: true, secure: true, sameSite: "None", partitioned: true });
+    const r = new Response(JSON.stringify({ ok: true }), {
+      headers: { "content-type": "application/json", vary: "trpc-accept, accept" },
+    });
+    return c.body(r.body, r);
   });
 
   // ── tRPC ──────────────────────────────────────────────────────────────────
