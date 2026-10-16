@@ -95,6 +95,13 @@ export function createApp(): Hono {
     c.header("Set-Cookie", "ap=1; Path=/; HttpOnly; Secure; SameSite=None", { append: true });
     return c.res;
   });
+  // Re-emit the trpcServer response through c.body() so the host sees a normal
+  // route-handler Response (the shape that DOES forward set-cookie).
+  app.use("/_debug/trpcreemit/*", async (c) => {
+    await dbgTrpc(c, async () => {});
+    const r = c.res;
+    return c.body(r.body, r.status, r.headers);
+  });
 
   // ── tRPC ──────────────────────────────────────────────────────────────────
   // Mounted under /trpc (Node runtime, and Vercel when its function mount
