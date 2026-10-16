@@ -14,6 +14,7 @@ import { Hono } from "hono";
 import type { Context } from "hono";
 import { setCookie } from "hono/cookie";
 import { trpcServer } from "@hono/trpc-server";
+import { router, publicProcedure } from "./trpc";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveAppStorage } from "./storage";
@@ -72,6 +73,17 @@ export function createApp(): Hono {
     });
     return c.body(r.body, r);
   });
+  // Real trpcServer on a debug path: isolates the adapter from the app router.
+  const dbgTrpc = trpcServer({
+    router: router({
+      ping: publicProcedure.mutation(async ({ ctx }) => {
+        setCookie(ctx.c, "dt", "1", { path: "/", httpOnly: true, secure: true, sameSite: "None", partitioned: true });
+        return { ok: true };
+      }),
+    }),
+    createContext: (_o, c) => ({ c }),
+  });
+  app.use("/_debug/trpcmw/*", dbgTrpc);
 
   // ── tRPC ──────────────────────────────────────────────────────────────────
   // Mounted under /trpc (Node runtime, and Vercel when its function mount
