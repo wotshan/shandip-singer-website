@@ -65,6 +65,13 @@ export function createApp(): Hono {
     });
     return c.body(r.body, r);
   });
+  app.use("/_debug/mw/*", async (c) => {
+    setCookie(c, "mw", "1", { path: "/", httpOnly: true, secure: true, sameSite: "None", partitioned: true });
+    const r = new Response(JSON.stringify({ ok: true }), {
+      headers: { "content-type": "application/json", vary: "trpc-accept, accept" },
+    });
+    return c.body(r.body, r);
+  });
 
   // ── tRPC ──────────────────────────────────────────────────────────────────
   // Mounted under /trpc (Node runtime, and Vercel when its function mount
