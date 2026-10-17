@@ -80,6 +80,17 @@ const adminRouter = router({
 });
 
 // ── Per-resource zod schemas ─────────────────────────────────────────────────
+
+/** Turn a zod failure into ONE human sentence for the admin form. The first
+ *  issue is the one the user should fix; the field path is prefixed so a form
+ *  with several blank fields says WHICH one. */
+function firstIssue(error: z.ZodError): string {
+  const issue = error.issues[0];
+  if (!issue) return "Some fields are invalid.";
+  const field = issue.path.join(".");
+  return field ? `${field}: ${issue.message}` : issue.message;
+}
+
 const resourceSchemas = {
   socials: z.object({
     key: z.string().min(1),
@@ -219,16 +230,27 @@ const contentRouter = router({
     .input(z.object({ resource: resourceName, values: z.record(z.string(), z.unknown()) }))
     .mutation(({ input }) => {
       const name = input.resource as ResourceName;
-      const parsed = resourceSchemas[name].parse(input.values);
-      return q.createResource(name, parsed as Record<string, unknown>);
+      // A zod failure here is a USER error (a required field is blank), not a
+      // server fault. Left unhandled it escapes as INTERNAL_SERVER_ERROR and the
+      // error formatter replaces it with the opaque "Something went wrong." —
+      // which is exactly how a blank Image field read as a broken upload. Map it
+      // to BAD_REQUEST and pass zod's own message through.
+      const parsed = resourceSchemas[name].safeParse(input.values);
+      if (!parsed.success) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: firstIssue(parsed.error) });
+      }
+      return q.createResource(name, parsed.data as Record<string, unknown>);
     }),
 
   update: adminProcedure
     .input(z.object({ resource: resourceName, id: z.string().min(1), values: z.record(z.string(), z.unknown()) }))
     .mutation(async ({ input }) => {
       const name = input.resource as ResourceName;
-      const parsed = resourceSchemas[name].partial().parse(input.values);
-      const row = await q.updateResource(name, input.id, parsed as Record<string, unknown>);
+      const parsed = resourceSchemas[name].partial().safeParse(input.values);
+      if (!parsed.success) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: firstIssue(parsed.error) });
+      }
+      const row = await q.updateResource(name, input.id, parsed.data as Record<string, unknown>);
       if (!row) throw new TRPCError({ code: "NOT_FOUND", message: "That item no longer exists." });
       return row;
     }),
