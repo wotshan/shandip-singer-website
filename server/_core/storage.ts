@@ -2,7 +2,7 @@ import type { Context } from "hono";
 import { and, count, desc, eq, isNull, type SQL } from "drizzle-orm";
 import { env } from "./env";
 import { db } from "./db";
-import { files } from "../../drizzle/schema";
+import { files, uploads } from "../../drizzle/schema";
 
 // Scoped file storage client (DESIGN §5.6). The app NEVER holds raw S3 creds —
 // it holds one durable scoped credential (APP_STORAGE_TOKEN) and asks the
@@ -276,6 +276,82 @@ export async function storagePutUrl(
   return { uploadUrl: url, publicPath: `/app-storage/${key}` };
 }
 
+/** True when the platform's scoped object-storage proxy is configured.
+ *
+ *  A deployment provisioned by the platform always has both vars. A deployment
+ *  that was NOT (this one) has neither, and every upload used to answer an
+ *  opaque 500. Callers use this to pick the storage backend instead of failing. */
+export function storageConfigured(): boolean {
+  return Boolean(env.storage.presignUrl && env.storage.token);
+}
+
+/** Reject a DB-backed write when the key is already held by a DIFFERENT owner.
+ *  The `uploads` mirror of assertNotOwnedByOther — the two tables are separate
+ *  key spaces, so each needs its own check. */
+async function assertUploadNotOwnedByOther(key: string, ownerId?: string | null): Promise<void> {
+  if (!ownerId) return;
+  const [existing] = await db
+    .select({ ownerId: uploads.ownerId })
+    .from(uploads)
+    .where(eq(uploads.key, key))
+    .limit(1);
+  if (existing?.ownerId && existing.ownerId !== ownerId) {
+    throw new StorageError(`key already owned by another user: ${key}`, "forbidden");
+  }
+}
+
+/** Store bytes in the `uploads` table — the fallback used when the platform's
+ *  object-storage proxy is not configured.
+ *
+ *  Unlike the presign flow (browser PUTs straight to storage, then commits),
+ *  this is ONE step: the bytes arrive with the request, so size and contentType
+ *  are known here and the row is written immediately. Re-uploading the same key
+ *  overwrites the bytes in place; the owner is fixed at first write, exactly
+ *  like storageCommit. */
+export async function storagePutBytes(
+  relKey: string,
+  bytes: Buffer,
+  contentType: string,
+  opts: { ownerId?: string | null; name?: string } = {},
+): Promise<{ publicPath: string }> {
+  const key = canonicalKey(relKey);
+  await assertUploadNotOwnedByOther(key, opts.ownerId);
+  const values = {
+    key,
+    ownerId: opts.ownerId ?? null,
+    name: opts.name ?? key.split("/").pop() ?? key,
+    contentType: contentType || "application/octet-stream",
+    size: bytes.length,
+    data: bytes,
+  };
+  await db
+    .insert(uploads)
+    .values(values)
+    .onConflictDoUpdate({
+      target: uploads.key,
+      set: {
+        name: values.name,
+        contentType: values.contentType,
+        size: values.size,
+        data: values.data,
+      },
+    });
+  return { publicPath: `/app-storage/${key}` };
+}
+
+/** Read bytes back for the DB-backed fallback. `null` means "no such object" —
+ *  a normal result, which is why this returns null instead of throwing. */
+export async function storageGetBytes(
+  relKey: string,
+): Promise<{ data: Buffer; contentType: string } | null> {
+  const [row] = await db
+    .select({ data: uploads.data, contentType: uploads.contentType })
+    .from(uploads)
+    .where(eq(uploads.key, canonicalKey(relKey)))
+    .limit(1);
+  return row ? { data: row.data, contentType: row.contentType } : null;
+}
+
 /** Hono handler for GET /app-storage/* — 307-redirects to a short-lived signed
  *  GET URL. Mounted by _core/index.ts; app code just links to /app-storage/...
  *
@@ -283,14 +359,34 @@ export async function storagePutUrl(
  *  "/app-storage//x.png" would reach the wire with a leading slash the
  *  platform's own normpath would collapse, the same key-aliasing this file's
  *  canonicalKey exists to close off. A rejected key falls through to the
- *  existing catch and renders as a 404, never a 500. */
+ *  existing catch and renders as a 404, never a 500.
+ *
+ *  TWO BACKENDS. When the platform proxy is configured this is the original
+ *  redirect. When it is NOT, the bytes come straight out of the `uploads` table
+ *  — so an image uploaded on a deployment without object storage still renders
+ *  at the same /app-storage/<key> URL the client already stores. */
 export async function serveAppStorage(c: Context): Promise<Response> {
   const raw = c.req.path.replace(/^\/app-storage\//, "");
   try {
     const key = canonicalKey(raw);
-    const { url } = await callStorage<{ url: string }>("get", key);
-    c.header("Cache-Control", "no-store");
-    return c.redirect(url, 307);
+    if (storageConfigured()) {
+      const { url } = await callStorage<{ url: string }>("get", key);
+      c.header("Cache-Control", "no-store");
+      return c.redirect(url, 307);
+    }
+    const row = await storageGetBytes(key);
+    if (!row) return c.text("Not found", 404);
+    // Copy into a standalone ArrayBuffer: a Buffer's .buffer can be a shared
+    // pool allocation, so slicing by byteOffset/byteLength is what keeps the
+    // response from carrying a neighbour's bytes.
+    const body = row.data.buffer.slice(
+      row.data.byteOffset,
+      row.data.byteOffset + row.data.byteLength,
+    ) as ArrayBuffer;
+    return c.body(body, 200, {
+      "Content-Type": row.contentType,
+      "Cache-Control": "public, max-age=31536000, immutable",
+    });
   } catch {
     return c.text("Not found", 404);
   }

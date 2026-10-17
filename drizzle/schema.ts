@@ -8,6 +8,7 @@ import {
   integer,
   boolean,
   jsonb,
+  customType,
 } from "drizzle-orm/pg-core";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -374,4 +375,43 @@ export const faqs = pgTable(
     sortOrder: integer("sort_order").notNull().default(0),
   },
   (t) => [index("faqs_order_idx").on(t.sortOrder)],
+);
+
+// ── Uploaded media bytes (DB-backed storage fallback) ────────────────────────
+// WHY THIS TABLE EXISTS
+//   The admin image picker uploads through the platform's scoped object-storage
+//   proxy (server/_core/storage.ts), which needs APP_STORAGE_PRESIGN_URL +
+//   APP_STORAGE_TOKEN. A deployment that was NOT provisioned by the platform has
+//   neither, so every upload answered an opaque 500 and the Gallery / Video Reel
+//   forms showed "Something went wrong. Please try again."
+//
+//   This table is the fallback: when the platform proxy is not configured, the
+//   bytes are stored HERE and served back from /app-storage/<key>. It is purely
+//   ADDITIVE — the `files` index above is untouched, and when the platform proxy
+//   IS configured nothing ever writes here.
+//
+// `data` is bytea, so a row is self-contained: no external bucket, no signed
+// URL, no second service to keep alive. The trade-off is size — a serverless
+// request body is capped (see MAX_UPLOAD_BYTES in server/routers.ts) and the
+// client downscales images before sending, so rows stay small.
+const bytea = customType<{ data: Buffer; driverData: Buffer }>({
+  dataType() {
+    return "bytea";
+  },
+});
+
+export const uploads = pgTable(
+  "uploads",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    // Same key space as `files.key`; served at /app-storage/<key>.
+    key: text("key").notNull().unique(),
+    ownerId: uuid("owner_id").references(() => users.id, { onDelete: "set null" }),
+    name: text("name").notNull(),
+    contentType: text("content_type").notNull().default("application/octet-stream"),
+    size: integer("size").notNull().default(0),
+    data: bytea("data").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("uploads_owner_idx").on(t.ownerId), index("uploads_created_idx").on(t.createdAt)],
 );

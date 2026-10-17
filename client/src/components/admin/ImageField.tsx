@@ -2,13 +2,24 @@ import { useRef, useState } from "react";
 import { ImagePlus, Loader2, X } from "lucide-react";
 import { trpc } from "@/_core/trpc";
 import { cn } from "@/lib/utils";
+import { fileToBase64, prepareImageForUpload } from "@/lib/image-upload";
 
 /**
  * Image picker for the gallery editor.
  *
- * Uploads through the platform's three-step protocol (signed URL → browser PUT
- * → commit) and stores the resulting `/app-storage/<key>` path in the field.
- * A path can also be typed by hand, so existing `/images/...` assets stay usable.
+ * TWO UPLOAD BACKENDS, chosen by the server (`files.mode`):
+ *
+ *   • "presign" — the platform's three-step protocol (signed URL → browser PUT
+ *     → commit). Used when the deployment has object storage configured; the
+ *     original bytes are preserved.
+ *   • "db"      — the bytes go up with the request and land in the `uploads`
+ *     table. Used when object storage is NOT configured, which is the case on
+ *     this deployment. Images are downscaled in the browser first so the
+ *     payload fits the serverless body cap.
+ *
+ * Either way the field ends up holding an `/app-storage/<key>` path, which
+ * `/app-storage/*` serves from whichever backend stored it. A path can also be
+ * typed by hand, so existing `/images/...` assets stay usable.
  */
 export function ImageField({
   value,
@@ -23,25 +34,40 @@ export function ImageField({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const modeQ = trpc.files.mode.useQuery();
   const uploadUrlM = trpc.files.uploadUrl.useMutation();
   const commitM = trpc.files.commit.useMutation();
+  const uploadM = trpc.files.upload.useMutation();
+
+  const dbMode = modeQ.data?.mode === "db";
 
   async function onPick(file: File) {
     setError(null);
     setBusy(true);
     try {
-      const { key, uploadUrl, publicPath } = await uploadUrlM.mutateAsync({
-        name: file.name,
-        contentType: file.type || "application/octet-stream",
-      });
-      const res = await fetch(uploadUrl, {
-        method: "PUT",
-        body: file,
-        headers: { "Content-Type": file.type || "application/octet-stream" },
-      });
-      if (!res.ok) throw new Error(`Upload failed (${res.status})`);
-      await commitM.mutateAsync({ key, name: file.name });
-      onChange(publicPath);
+      if (dbMode) {
+        const prepared = await prepareImageForUpload(file);
+        const dataBase64 = await fileToBase64(prepared);
+        const { publicPath } = await uploadM.mutateAsync({
+          name: prepared.name,
+          contentType: prepared.type || "application/octet-stream",
+          dataBase64,
+        });
+        onChange(publicPath);
+      } else {
+        const { key, uploadUrl, publicPath } = await uploadUrlM.mutateAsync({
+          name: file.name,
+          contentType: file.type || "application/octet-stream",
+        });
+        const res = await fetch(uploadUrl, {
+          method: "PUT",
+          body: file,
+          headers: { "Content-Type": file.type || "application/octet-stream" },
+        });
+        if (!res.ok) throw new Error(`Upload failed (${res.status})`);
+        await commitM.mutateAsync({ key, name: file.name });
+        onChange(publicPath);
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Upload failed");
     } finally {
@@ -74,10 +100,10 @@ export function ImageField({
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
-              disabled={busy}
+              disabled={busy || modeQ.isLoading}
               className={cn(
                 "inline-flex items-center gap-2 rounded-full border border-border-strong px-4 py-1.5 text-xs font-medium text-foreground transition-colors hover:border-crimson/60 hover:bg-crimson/10",
-                busy && "opacity-60",
+                (busy || modeQ.isLoading) && "opacity-60",
               )}
             >
               {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImagePlus className="h-3.5 w-3.5" />}

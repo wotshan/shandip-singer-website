@@ -10,7 +10,15 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { router, publicProcedure, adminProcedure } from "./_core/trpc";
 import { authProvider, AuthError } from "./_core/auth";
-import { storageCommit, storageDeleteOwned, storageListByOwner, storagePutUrl, StorageError } from "./_core/storage";
+import {
+  storageCommit,
+  storageConfigured,
+  storageDeleteOwned,
+  storageListByOwner,
+  storagePutBytes,
+  storagePutUrl,
+  StorageError,
+} from "./_core/storage";
 import { ADMIN_USERNAME, clearRateLimit, ensureAdminUser, rateLimit } from "./admin";
 import * as q from "./db";
 import { isResourceName, type ResourceName } from "./db";
@@ -320,6 +328,11 @@ export function sanitizeBasename(name: string): string {
   return ext ? `${stem}.${ext}` : stem;
 }
 
+/** Hard ceiling on a single DB-backed upload. A serverless request body is
+ *  capped at 4.5 MB and base64 inflates by ~4/3, so 3 MB of raw bytes is the
+ *  largest that reliably fits. The client downscales images well below this. */
+const MAX_UPLOAD_BYTES = 3 * 1024 * 1024;
+
 const filesRouter = router({
   uploadUrl: adminProcedure
     .input(z.object({ name: z.string().min(1), contentType: z.string().min(1) }))
@@ -337,6 +350,56 @@ const filesRouter = router({
             message:
               "upload rejected by storage — allowed types: png/jpeg/gif/webp/avif, pdf, text/plain, csv, json, mpeg/wav audio, mp4/webm video",
           });
+        }
+        // Without this the client only ever saw the opaque "Something went
+        // wrong. Please try again." — the real cause (no object storage on this
+        // deployment) was invisible. Say it plainly instead.
+        if (e instanceof StorageError && e.code === "not_configured") {
+          throw new TRPCError({
+            code: "PRECONDITION_FAILED",
+            message: "Image storage is not configured on this deployment.",
+          });
+        }
+        throw e;
+      }
+    }),
+
+  /** Which upload backend this deployment uses. The client asks once and picks
+   *  the matching flow: "presign" (browser PUTs to a signed URL, then commits)
+   *  or "db" (bytes go up with the request and land in the `uploads` table). */
+  mode: adminProcedure.query(() => ({ mode: storageConfigured() ? "presign" : "db" })),
+
+  /** One-step upload for the DB backend. The client downscales images first, so
+   *  the base64 payload stays far below the serverless body cap. */
+  upload: adminProcedure
+    .input(
+      z.object({
+        name: z.string().min(1),
+        contentType: z.string().min(1),
+        dataBase64: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const bytes = Buffer.from(input.dataBase64, "base64");
+      if (bytes.length === 0) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "That file was empty." });
+      }
+      if (bytes.length > MAX_UPLOAD_BYTES) {
+        throw new TRPCError({
+          code: "PAYLOAD_TOO_LARGE",
+          message: `That image is too large (max ${Math.round(MAX_UPLOAD_BYTES / 1024 / 1024)} MB).`,
+        });
+      }
+      const key = `${crypto.randomUUID()}-${sanitizeBasename(input.name)}`;
+      try {
+        const { publicPath } = await storagePutBytes(key, bytes, input.contentType, {
+          ownerId: ctx.user.id,
+          name: input.name,
+        });
+        return { key, publicPath };
+      } catch (e) {
+        if (e instanceof StorageError && e.code === "forbidden") {
+          throw new TRPCError({ code: "FORBIDDEN", message: "that key belongs to another user" });
         }
         throw e;
       }
