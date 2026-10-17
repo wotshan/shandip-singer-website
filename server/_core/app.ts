@@ -12,6 +12,7 @@
 // index.ts; the SPA read lives behind mountClient() (prod-only).
 import { Hono } from "hono";
 import type { Context } from "hono";
+import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { trpcServer } from "@hono/trpc-server";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
@@ -55,7 +56,9 @@ export function createApp(): Hono {
     createContext: (_opts, c) => createContext(c),
   });
   const trpcMount = async (c: Context) => {
-    const res = await trpc(c, async () => {});
+    // The adapter's handler is typed `Promise<void | Response>`; on this mount it
+    // always returns the tRPC Response, so narrow it for the header/body reads.
+    const res = (await trpc(c, async () => {})) as Response;
     const body = await res.arrayBuffer();
     // Build the final response through Hono's own builder (c.body). Vercel's
     // Node.js runtime forwards Set-Cookie only for a Hono-built response; a raw
@@ -63,7 +66,7 @@ export function createApp(): Hono {
     // starts from Hono's prepared headers, which is where setCookie() wrote the
     // session cookie, so the cookie survives; the adapter's other headers
     // (content-type, vary) are copied over explicitly.
-    const out = c.body(body, res.status);
+    const out = c.body(body, res.status as ContentfulStatusCode);
     res.headers.forEach((v, k) => {
       if (k.toLowerCase() !== "set-cookie") out.headers.set(k, v);
     });
